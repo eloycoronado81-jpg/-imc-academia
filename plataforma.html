@@ -91,12 +91,19 @@
   .instructor-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .instructor-form .field-full{grid-column:1/-1;}
   .instructor-form label{font-size:11.5px;font-weight:600;color:#B9C3D2;display:block;margin-bottom:5px;}
-  .instructor-form select, .instructor-form input{width:100%;height:40px;padding:0 12px;border:1px solid var(--line-dark, rgba(245,244,239,0.2));border-radius:var(--radius);font-size:13.5px;background:rgba(245,244,239,0.08);color:var(--paper);}
-  .instructor-form select option{background:#fff;color:var(--blue);}
+  .instructor-form select, .instructor-form input{width:100%;height:40px;padding:0 12px;border:1px solid var(--line-dark, rgba(245,244,239,0.2));border-radius:var(--radius);font-size:13.5px;background:#fff;color:var(--blue);}
   @media(max-width:520px){.instructor-form{grid-template-columns:1fr;}}
 
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--blue);color:var(--paper);padding:14px 22px;border-radius:6px;font-size:14px;font-weight:500;box-shadow:0 8px 24px rgba(11,37,69,0.3);opacity:0;transition:opacity .25s, transform .25s;z-index:200;pointer-events:none;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .course-modal-box{background:var(--paper);width:100%;max-width:640px;height:auto;max-height:85vh;border-radius:8px;overflow-y:auto;display:block;}
+  .course-modal-body{padding:24px;}
+  .course-form{background:#fff;border:1px solid var(--line);border-radius:6px;padding:18px;margin-bottom:32px;}
+  .course-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+  .course-form-grid input{height:40px;padding:0 12px;border:1px solid var(--line);border-radius:var(--radius);font-size:13.5px;background:var(--paper);color:var(--blue);width:100%;}
+  @media(max-width:480px){.course-form-grid{grid-template-columns:1fr;}}
+  .empty-note{color:var(--muted);font-size:13px;padding:14px 0;}
 </style>
 </head>
 <body>
@@ -151,29 +158,7 @@
 
   <div id="instructorPanel" class="instructor-panel hidden">
     <div class="section-title">Panel de instructor</div>
-    <form id="sessionForm" class="instructor-form">
-      <div class="field-full">
-        <label for="sessionPrograma">Programa</label>
-        <select id="sessionPrograma" required></select>
-      </div>
-      <div>
-        <label for="sessionTitulo">Título de la clase</label>
-        <input id="sessionTitulo" type="text" placeholder="Clase 1: Introducción" required>
-      </div>
-      <div>
-        <label for="sessionFecha">Fecha y hora</label>
-        <input id="sessionFecha" type="datetime-local" required>
-      </div>
-      <div class="field-full">
-        <button type="submit" class="btn btn-primary" id="sessionBtn">Programar clase en vivo</button>
-        <span class="msg" id="sessionMsg" style="color:#B9C3D2;"></span>
-      </div>
-    </form>
-  </div>
-
-  <div id="clasesEnVivo">
-    <div class="section-title">Clases en vivo</div>
-    <div class="prog-list" id="sesionesList"></div>
+    <p style="color:#B9C3D2;font-size:13.5px;margin:0;">Para programar una clase, entra al "Aula virtual" del curso que quieras desde la lista de abajo — ahí ya queda todo dentro de ese mismo curso, sin mezclarse con los demás.</p>
   </div>
 
   <div id="misProgramas">
@@ -184,6 +169,37 @@
   <div>
     <div class="section-title">Catálogo completo</div>
     <div class="prog-list" id="catalogoList"></div>
+  </div>
+</div>
+
+<div id="courseModal" class="modal-overlay hidden">
+  <div class="course-modal-box">
+    <div class="modal-head" style="background:var(--blue);border-radius:8px 8px 0 0;">
+      <div>
+        <div class="modal-head-title" id="courseModalTitle">Aula virtual</div>
+        <div class="modal-head-sub">Clases en vivo y grabaciones de este curso</div>
+      </div>
+      <button class="modal-close" id="courseModalClose">✕ Cerrar</button>
+    </div>
+    <div class="course-modal-body">
+      <div id="courseFormBox" class="course-form hidden">
+        <div class="section-title" style="margin:0;">Programar nueva clase</div>
+        <form id="courseSessionForm">
+          <div class="course-form-grid">
+            <input id="courseSessionTitulo" type="text" placeholder="Título de la clase" required>
+            <input id="courseSessionFecha" type="datetime-local" required>
+          </div>
+          <button type="submit" class="btn btn-primary" id="courseSessionBtn" style="margin-top:12px;">Programar</button>
+          <span class="msg" id="courseSessionMsg"></span>
+        </form>
+      </div>
+
+      <div class="section-title">Próximas clases</div>
+      <div class="prog-list" id="courseUpcomingList" style="margin-bottom:32px;"></div>
+
+      <div class="section-title">Grabaciones</div>
+      <div class="prog-list" id="courseRecordingsList"></div>
+    </div>
   </div>
 </div>
 
@@ -234,42 +250,50 @@
     }
   }
 
-  function progItemHTML(programa, inscripcion){
+  function progItemHTML(programa, inscripcion, isInstructor){
     const pct = inscripcion ? Number(inscripcion.progreso_pct) : 0;
-    const actionHTML = inscripcion
-      ? `<div class="prog-bar-track"><div class="prog-bar-fill" style="width:${pct}%"></div></div>`
-      : `<button class="btn btn-primary" data-programa-id="${programa.id}">Inscribirme</button>`;
+    const showClassroom = inscripcion || isInstructor;
+    let actionHTML = '';
+    if (inscripcion) {
+      actionHTML = `<div class="prog-bar-track"><div class="prog-bar-fill" style="width:${pct}%"></div></div>`;
+    } else {
+      actionHTML = `<button class="btn btn-primary" data-programa-id="${programa.id}">Inscribirme</button>`;
+    }
+    const classroomBtn = showClassroom
+      ? `<button class="btn btn-ghost" data-classroom-id="${programa.id}" data-classroom-titulo="${programa.titulo.replace(/"/g,'&quot;')}">Aula virtual</button>`
+      : '';
     return `
       <div class="prog-item">
         <div>
           <p class="prog-name">${programa.titulo}</p>
           <span class="prog-meta">${programa.duracion_semanas} semanas · ${inscripcion ? (inscripcion.estado) : 'disponible'}</span>
         </div>
-        ${actionHTML}
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          ${classroomBtn}
+          ${actionHTML}
+        </div>
       </div>`;
   }
 
-  function sessionItemHTML(s){
+  function sessionItemHTML(s, mostrarGrabacion){
     const fecha = new Date(s.fecha_hora);
     const fechaTxt = fecha.toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' });
     const liveBadge = s.estado === 'en_vivo' ? '<span class="badge-live">En vivo</span>' : '';
-    let actionHTML = '';
-    if (s.grabacion_url) {
-      actionHTML = `<a class="btn btn-ghost" href="${s.grabacion_url}" target="_blank" rel="noopener">Ver grabación</a>`;
-    } else {
-      actionHTML = `<button class="btn btn-primary" data-room="${s.room_name}" data-titulo="${s.titulo.replace(/"/g,'&quot;')}">Unirse a la clase</button>`;
-    }
+    const actionHTML = mostrarGrabacion
+      ? `<a class="btn btn-ghost" href="${s.grabacion_url}" target="_blank" rel="noopener">Ver grabación</a>`
+      : `<button class="btn btn-primary" data-room="${s.room_name}" data-titulo="${s.titulo.replace(/"/g,'&quot;')}">Unirse a la clase</button>`;
     return `
       <div class="session-item">
         <div>
           <p class="session-name">${s.titulo}${liveBadge}</p>
-          <span class="session-meta">${s.programas ? s.programas.titulo : ''} · ${fechaTxt}</span>
+          <span class="session-meta">${fechaTxt}</span>
         </div>
         ${actionHTML}
       </div>`;
   }
 
   let currentUserName = '';
+  let currentCourseId = null;
 
   function openJitsi(roomName, titulo){
     document.getElementById('jitsiTitle').textContent = titulo || 'Clase en vivo';
@@ -287,67 +311,74 @@
   }
   document.getElementById('jitsiClose').addEventListener('click', closeJitsi);
 
-  async function loadSesiones(programaIds){
-    const listEl = document.getElementById('sesionesList');
-    if (!programaIds.length){
-      listEl.innerHTML = '<div class="session-item"><p class="session-meta" style="margin:0;">Inscríbete a un programa para ver sus clases en vivo.</p></div>';
-      return;
-    }
+  async function loadCourseSesiones(programaId){
+    const upcomingEl = document.getElementById('courseUpcomingList');
+    const recEl = document.getElementById('courseRecordingsList');
+
     const { data: sesiones } = await supabase
       .from('sesiones')
-      .select('*, programas(titulo)')
-      .in('programa_id', programaIds)
+      .select('*')
+      .eq('programa_id', programaId)
       .order('fecha_hora', { ascending: true });
 
-    listEl.innerHTML = '';
-    if (!sesiones || sesiones.length === 0){
-      listEl.innerHTML = '<div class="session-item"><p class="session-meta" style="margin:0;">Aún no hay clases programadas.</p></div>';
-      return;
-    }
-    sesiones.forEach(s => listEl.insertAdjacentHTML('beforeend', sessionItemHTML(s)));
-    listEl.querySelectorAll('button[data-room]').forEach(btn => {
-      btn.addEventListener('click', () => openJitsi(btn.dataset.room, btn.dataset.titulo));
+    const upcoming = (sesiones || []).filter(s => !s.grabacion_url);
+    const grabadas = (sesiones || []).filter(s => s.grabacion_url);
+
+    upcomingEl.innerHTML = upcoming.length
+      ? upcoming.map(s => sessionItemHTML(s, false)).join('')
+      : '<p class="empty-note">Aún no hay clases programadas para este curso.</p>';
+
+    recEl.innerHTML = grabadas.length
+      ? grabadas.map(s => sessionItemHTML(s, true)).join('')
+      : '<p class="empty-note">Todavía no hay grabaciones disponibles.</p>';
+
+    upcomingEl.querySelectorAll('button[data-room]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('courseModal').classList.add('hidden');
+        openJitsi(btn.dataset.room, btn.dataset.titulo);
+      });
     });
   }
 
-  async function setupInstructorPanel(user, isInstructor){
-    if (!isInstructor) return;
-    document.getElementById('instructorPanel').classList.remove('hidden');
+  async function openCourseModal(programaId, titulo, isInstructor, userId){
+    currentCourseId = programaId;
+    document.getElementById('courseModalTitle').textContent = titulo;
+    document.getElementById('courseFormBox').classList.toggle('hidden', !isInstructor);
+    document.getElementById('courseModal').classList.remove('hidden');
+    await loadCourseSesiones(programaId);
 
-    const { data: programas } = await supabase.from('programas').select('id, titulo').eq('activo', true).order('orden');
-    const select = document.getElementById('sessionPrograma');
-    select.innerHTML = (programas || []).map(p => `<option value="${p.id}">${p.titulo}</option>`).join('');
-
-    const form = document.getElementById('sessionForm');
-    if (form.dataset.bound === 'true') return;
-    form.dataset.bound = 'true';
-
-    form.addEventListener('submit', async (e) => {
+    const form = document.getElementById('courseSessionForm');
+    form.onsubmit = async (e) => {
       e.preventDefault();
-      const btn = document.getElementById('sessionBtn');
-      const msg = document.getElementById('sessionMsg');
+      const btn = document.getElementById('courseSessionBtn');
+      const msg = document.getElementById('courseSessionMsg');
       btn.disabled = true;
       btn.textContent = 'Programando…';
 
       const { error } = await supabase.from('sesiones').insert({
-        programa_id: select.value,
-        titulo: document.getElementById('sessionTitulo').value.trim(),
-        fecha_hora: new Date(document.getElementById('sessionFecha').value).toISOString(),
-        creado_por: user.id
+        programa_id: currentCourseId,
+        titulo: document.getElementById('courseSessionTitulo').value.trim(),
+        fecha_hora: new Date(document.getElementById('courseSessionFecha').value).toISOString(),
+        creado_por: userId
       });
 
       if (!error){
         msg.textContent = 'Clase programada.';
-        document.getElementById('sessionForm').reset();
-        const { data: inscripciones } = await supabase.from('inscripciones').select('programa_id').eq('usuario_id', user.id);
-        await loadSesiones((inscripciones || []).map(i => i.programa_id));
+        msg.className = 'msg ok';
+        form.reset();
+        await loadCourseSesiones(currentCourseId);
       } else {
         msg.textContent = 'No se pudo programar. Intenta de nuevo.';
+        msg.className = 'msg err';
       }
       btn.disabled = false;
-      btn.textContent = 'Programar clase en vivo';
-    });
+      btn.textContent = 'Programar';
+    };
   }
+
+  document.getElementById('courseModalClose').addEventListener('click', () => {
+    document.getElementById('courseModal').classList.add('hidden');
+  });
 
   async function loadDashboard(user){
     document.getElementById('userEmail').textContent = user.email;
@@ -356,14 +387,13 @@
     const isInstructor = perfil && (perfil.rol === 'instructor' || perfil.rol === 'admin');
     currentUserName = (perfil && perfil.nombre) || user.email.split('@')[0];
 
+    document.getElementById('instructorPanel').classList.toggle('hidden', !isInstructor);
+
     const { data: programas } = await supabase.from('programas').select('*').eq('activo', true).order('orden');
     const { data: inscripciones } = await supabase.from('inscripciones').select('*').eq('usuario_id', user.id);
 
     const inscMap = {};
     (inscripciones || []).forEach(i => { inscMap[i.programa_id] = i; });
-
-    await loadSesiones((inscripciones || []).map(i => i.programa_id));
-    await setupInstructorPanel(user, isInstructor);
 
     const misList = document.getElementById('misProgramasList');
     const catList = document.getElementById('catalogoList');
@@ -373,16 +403,25 @@
     const inscritos = (programas || []).filter(p => inscMap[p.id]);
     const disponibles = (programas || []).filter(p => !inscMap[p.id]);
 
-    if (inscritos.length === 0){
+    if (inscritos.length === 0 && !isInstructor){
       misList.innerHTML = '<div class="prog-item"><p class="prog-meta" style="margin:0;">Aún no te inscribes a ningún programa — elige uno del catálogo.</p></div>';
     } else {
-      inscritos.forEach(p => misList.insertAdjacentHTML('beforeend', progItemHTML(p, inscMap[p.id])));
+      inscritos.forEach(p => misList.insertAdjacentHTML('beforeend', progItemHTML(p, inscMap[p.id], isInstructor)));
+      if (inscritos.length === 0){
+        misList.innerHTML = '<p class="empty-note">Aún no te inscribes a ningún programa. Como instructor, igual puedes abrir el aula virtual de cualquiera desde el catálogo.</p>';
+      }
     }
 
-    disponibles.forEach(p => catList.insertAdjacentHTML('beforeend', progItemHTML(p, null)));
+    disponibles.forEach(p => catList.insertAdjacentHTML('beforeend', progItemHTML(p, null, isInstructor)));
     if (disponibles.length === 0){
       catList.innerHTML = '<div class="prog-item"><p class="prog-meta" style="margin:0;">Ya estás inscrito en todos los programas disponibles.</p></div>';
     }
+
+    document.querySelectorAll('button[data-classroom-id]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        openCourseModal(btn.dataset.classroomId, btn.dataset.classroomTitulo, isInstructor, user.id);
+      });
+    });
 
     catList.querySelectorAll('button[data-programa-id]').forEach(btn => {
       btn.addEventListener('click', async () => {
