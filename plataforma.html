@@ -104,6 +104,20 @@
   .course-form-grid input{height:40px;padding:0 12px;border:1px solid var(--line);border-radius:var(--radius);font-size:13.5px;background:var(--paper);color:var(--blue);width:100%;}
   @media(max-width:480px){.course-form-grid{grid-template-columns:1fr;}}
   .empty-note{color:var(--muted);font-size:13px;padding:14px 0;}
+
+  .student-item{background:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line);}
+  .student-item:last-child{border-bottom:none;}
+  .student-name{font-weight:600;font-size:14px;margin:0 0 2px;}
+  .student-meta{font-family:var(--font-mono);font-size:11px;color:var(--muted);}
+  .badge-done{background:#1E8A63;color:#fff;font-family:var(--font-mono);font-size:10px;padding:3px 9px;border-radius:20px;text-transform:uppercase;}
+
+  .cert-box{background:#fff;border:2px solid var(--blue);border-radius:8px;padding:40px;text-align:center;max-width:520px;margin:0 auto;}
+  .cert-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent-dark);margin-bottom:18px;}
+  .cert-title{font-family:var(--font-display);font-weight:700;font-size:14px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+  .cert-name{font-family:var(--font-display);font-weight:700;font-size:26px;text-transform:uppercase;margin-bottom:22px;}
+  .cert-program{font-size:16px;font-weight:600;margin-bottom:6px;}
+  .cert-date{font-size:13px;color:var(--muted);margin-bottom:26px;}
+  .cert-code{font-family:var(--font-mono);font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;}
 </style>
 </head>
 <body>
@@ -198,7 +212,24 @@
       <div class="prog-list" id="courseUpcomingList" style="margin-bottom:32px;"></div>
 
       <div class="section-title">Grabaciones</div>
-      <div class="prog-list" id="courseRecordingsList"></div>
+      <div class="prog-list" id="courseRecordingsList" style="margin-bottom:32px;"></div>
+
+      <div id="courseStudentsBox" class="hidden">
+        <div class="section-title">Estudiantes inscritos</div>
+        <div class="prog-list" id="courseStudentsList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="certModal" class="modal-overlay hidden">
+  <div class="course-modal-box" style="max-width:560px;background:var(--paper);">
+    <div class="modal-head" style="background:var(--blue);border-radius:8px 8px 0 0;">
+      <div class="modal-head-title">Certificado</div>
+      <button class="modal-close" id="certModalClose">✕ Cerrar</button>
+    </div>
+    <div class="course-modal-body">
+      <div class="cert-box" id="certContent"></div>
     </div>
   </div>
 </div>
@@ -254,7 +285,9 @@
     const pct = inscripcion ? Number(inscripcion.progreso_pct) : 0;
     const showClassroom = inscripcion || isInstructor;
     let actionHTML = '';
-    if (inscripcion) {
+    if (inscripcion && inscripcion.estado === 'completado') {
+      actionHTML = `<button class="btn btn-primary" data-cert-inscripcion="${inscripcion.id}">Ver certificado</button>`;
+    } else if (inscripcion) {
       actionHTML = `<div class="prog-bar-track"><div class="prog-bar-fill" style="width:${pct}%"></div></div>`;
     } else {
       actionHTML = `<button class="btn btn-primary" data-programa-id="${programa.id}">Inscribirme</button>`;
@@ -340,12 +373,109 @@
     });
   }
 
+  async function loadCourseStudents(programaId){
+    const box = document.getElementById('courseStudentsBox');
+    const listEl = document.getElementById('courseStudentsList');
+    box.classList.remove('hidden');
+
+    const { data: inscripciones } = await supabase
+      .from('inscripciones')
+      .select('*, usuarios(nombre, correo)')
+      .eq('programa_id', programaId);
+
+    if (!inscripciones || inscripciones.length === 0){
+      listEl.innerHTML = '<p class="empty-note">Nadie se ha inscrito a este curso todavía.</p>';
+      return;
+    }
+
+    listEl.innerHTML = inscripciones.map(i => {
+      const nombre = (i.usuarios && i.usuarios.nombre) || 'Estudiante';
+      const correo = (i.usuarios && i.usuarios.correo) || '';
+      const done = i.estado === 'completado';
+      const action = done
+        ? '<span class="badge-done">Completado</span>'
+        : `<button class="btn btn-primary" data-inscripcion-id="${i.id}">Marcar completado</button>`;
+      return `
+        <div class="student-item">
+          <div>
+            <p class="student-name">${nombre}</p>
+            <span class="student-meta">${correo}</span>
+          </div>
+          ${action}
+        </div>`;
+    }).join('');
+
+    listEl.querySelectorAll('button[data-inscripcion-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        btn.textContent = 'Marcando…';
+        const inscripcionId = btn.dataset.inscripcionId;
+
+        const { error: updError } = await supabase
+          .from('inscripciones')
+          .update({ estado: 'completado', progreso_pct: 100 })
+          .eq('id', inscripcionId);
+
+        if (updError){
+          showToast('No se pudo marcar como completado: ' + updError.message);
+          btn.disabled = false;
+          btn.textContent = 'Marcar completado';
+          return;
+        }
+
+        const { error: certError } = await supabase.from('certificados').insert({ inscripcion_id: inscripcionId });
+
+        if (certError){
+          showToast('Se marcó completado, pero el certificado no se pudo emitir: ' + certError.message);
+        } else {
+          showToast('¡Completado! Certificado emitido.');
+        }
+        await loadCourseStudents(currentCourseId);
+      });
+    });
+  }
+
+  async function openCertificate(inscripcionId){
+    const { data: cert, error } = await supabase
+      .from('certificados')
+      .select('*, inscripciones(programa_id, usuario_id, programas(titulo), usuarios(nombre))')
+      .eq('inscripcion_id', inscripcionId)
+      .maybeSingle();
+
+    if (error || !cert){
+      showToast('No se encontró el certificado todavía.');
+      return;
+    }
+
+    const nombre = (cert.inscripciones && cert.inscripciones.usuarios && cert.inscripciones.usuarios.nombre) || currentUserName;
+    const programa = (cert.inscripciones && cert.inscripciones.programas && cert.inscripciones.programas.titulo) || '';
+    const fecha = new Date(cert.fecha_emision).toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    document.getElementById('certContent').innerHTML = `
+      <div class="cert-eyebrow">IMC Academia — Certificado de finalización</div>
+      <div class="cert-title">Se certifica que</div>
+      <div class="cert-name">${nombre}</div>
+      <div class="cert-title">completó satisfactoriamente el programa</div>
+      <div class="cert-program">${programa}</div>
+      <div class="cert-date">Emitido el ${fecha}</div>
+      <div class="cert-code">Código de verificación: ${cert.codigo_verificacion}</div>
+    `;
+    document.getElementById('certModal').classList.remove('hidden');
+  }
+  document.getElementById('certModalClose').addEventListener('click', () => {
+    document.getElementById('certModal').classList.add('hidden');
+  });
+
   async function openCourseModal(programaId, titulo, isInstructor, userId){
     currentCourseId = programaId;
     document.getElementById('courseModalTitle').textContent = titulo;
     document.getElementById('courseFormBox').classList.toggle('hidden', !isInstructor);
+    document.getElementById('courseStudentsBox').classList.toggle('hidden', !isInstructor);
     document.getElementById('courseModal').classList.remove('hidden');
     await loadCourseSesiones(programaId);
+    if (isInstructor){
+      await loadCourseStudents(programaId);
+    }
 
     const form = document.getElementById('courseSessionForm');
     form.onsubmit = async (e) => {
@@ -420,6 +550,12 @@
     document.querySelectorAll('button[data-classroom-id]').forEach(btn => {
       btn.addEventListener('click', () => {
         openCourseModal(btn.dataset.classroomId, btn.dataset.classroomTitulo, isInstructor, user.id);
+      });
+    });
+
+    document.querySelectorAll('button[data-cert-inscripcion]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        openCertificate(btn.dataset.certInscripcion);
       });
     });
 
