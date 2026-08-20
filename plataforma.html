@@ -146,6 +146,51 @@
   .ai-input-row input{flex:1;height:40px;padding:0 12px;border:1px solid var(--line-strong);border-radius:var(--radius);font-size:13.5px;background:var(--ink);color:var(--text);}
   .ai-send{height:40px;padding:0 16px;background:var(--teal);color:#04211D;border:none;border-radius:var(--radius);cursor:pointer;font-weight:600;}
   .ai-send:disabled{opacity:0.6;}
+
+  /* ===== Campus layout ===== */
+  .campus{display:flex;min-height:calc(100vh - 66px);}
+  .sidebar{width:220px;flex-shrink:0;background:var(--ink-2);border-right:1px solid var(--line);padding:24px 16px;display:flex;flex-direction:column;position:sticky;top:66px;height:calc(100vh - 66px);}
+  .sidebar-nav{display:flex;flex-direction:column;gap:2px;margin-top:8px;}
+  .sidebar-nav a{display:block;padding:10px 12px;border-radius:var(--radius);color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:500;transition:background .12s, color .12s;}
+  .sidebar-nav a:hover{background:var(--ink-3);color:var(--text);}
+  .sidebar-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--line);}
+  .sidebar-email{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);word-break:break-all;margin-bottom:10px;}
+  .campus-main{flex:1;min-width:0;padding:32px 32px 80px;max-width:900px;}
+  @media(max-width:820px){
+    .campus{flex-direction:column;}
+    .sidebar{width:100%;position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px;padding:14px 20px;}
+    .sidebar-nav{flex-direction:row;flex-wrap:wrap;margin-top:0;}
+    .sidebar-foot{margin-top:0;margin-left:auto;padding-top:0;border-top:none;display:flex;align-items:center;gap:10px;}
+    .sidebar-email{display:none;}
+    .campus-main{padding:24px 20px 80px;}
+  }
+
+  .greeting{font-family:var(--font-display);font-weight:700;font-size:26px;margin:0 0 4px;}
+  .greeting-sub{color:var(--muted);font-size:14px;margin:0 0 28px;}
+
+  .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:40px;}
+  .stat-card{background:var(--ink-2);padding:20px;}
+  .stat-num{font-family:var(--font-display);font-weight:700;font-size:28px;color:var(--teal);line-height:1;}
+  .stat-label{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.03em;margin-top:6px;}
+
+  .ruta-track{background:var(--ink-2);border:1px solid var(--line);border-radius:8px;padding:24px;margin-bottom:40px;}
+  .ruta-track-title{font-weight:600;font-size:15px;margin:0 0 4px;}
+  .ruta-track-sub{font-family:var(--font-mono);font-size:11.5px;color:var(--muted);margin-bottom:20px;}
+  .ruta-steps{display:flex;gap:8px;flex-wrap:wrap;}
+  .ruta-step{flex:1;min-width:110px;padding:10px 12px;border-radius:var(--radius);font-size:12px;border:1px solid var(--line-strong);}
+  .ruta-step.done{background:rgba(79,216,196,0.14);border-color:var(--teal);color:var(--teal);}
+  .ruta-step.pending{color:var(--muted);}
+
+  .caso-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:44px;}
+  .caso-card{background:var(--ink-2);padding:22px;cursor:pointer;transition:background .12s;}
+  .caso-card:hover{background:var(--ink-3);}
+  .caso-tag{font-family:var(--font-mono);font-size:10px;color:var(--teal);text-transform:uppercase;margin-bottom:10px;}
+  .caso-title{font-weight:600;font-size:15px;margin:0 0 8px;}
+  .caso-diff{font-family:var(--font-mono);font-size:11px;color:var(--muted);}
+  .caso-detail{background:var(--ink-2);border:1px solid var(--line-strong);border-radius:8px;padding:24px;margin-bottom:20px;}
+  .caso-detail h3{margin:0 0 12px;font-family:var(--font-display);}
+  .caso-detail p{color:var(--text);font-size:14px;line-height:1.7;margin:0 0 14px;}
+  .caso-reveal{background:var(--ink-3);border-radius:6px;padding:16px;margin-top:14px;}
 </style>
 </head>
 <body>
@@ -189,29 +234,65 @@
   </form>
 </div>
 
-<div id="dashboard" class="wrap hidden">
-  <div class="dash-head">
-    <div>
-      <h1 class="dash-title">Mi panel</h1>
-      <div class="dash-sub" id="userEmail"></div>
+<div id="dashboard" class="campus hidden">
+  <aside class="sidebar">
+    <a class="brand" href="index.html" style="margin-bottom:8px;"><span class="brand-mark"></span>IMC Academia</a>
+    <nav class="sidebar-nav">
+      <a href="#inicio">Inicio</a>
+      <a href="#mis-programas">Mis programas</a>
+      <a href="#catalogo">Catálogo</a>
+      <a href="#casos">Casos industriales</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="sidebar-email" id="userEmail"></div>
+      <button class="btn btn-ghost btn-block" id="logoutBtn">Cerrar sesión</button>
     </div>
-    <button class="btn btn-ghost" id="logoutBtn">Cerrar sesión</button>
-  </div>
+  </aside>
 
-  <div id="instructorPanel" class="instructor-panel hidden">
-    <div class="section-title">Panel de instructor</div>
-    <p style="color:#B9C3D2;font-size:13.5px;margin:0;">Para programar una clase, entra al "Aula virtual" del curso que quieras desde la lista de abajo — ahí ya queda todo dentro de ese mismo curso, sin mezclarse con los demás.</p>
-  </div>
+  <main class="campus-main">
+    <div id="inicio">
+      <h1 class="greeting" id="greetingText">Hola</h1>
+      <p class="greeting-sub">Bienvenido a tu panel — sigue aprendiendo desde donde te quedaste.</p>
 
-  <div id="misProgramas">
-    <div class="section-title">Mis programas</div>
-    <div class="prog-list" id="misProgramasList"></div>
-  </div>
+      <div class="stats-row" id="statsRow"></div>
 
-  <div>
-    <div class="section-title">Catálogo completo</div>
-    <div class="prog-list" id="catalogoList"></div>
-  </div>
+      <div id="rutaBox"></div>
+    </div>
+
+    <div id="instructorPanel" class="instructor-panel hidden">
+      <div class="section-title">Panel de instructor</div>
+      <p style="color:#B9C3D2;font-size:13.5px;margin:0;">Para programar una clase, entra al "Aula virtual" del curso que quieras desde la lista de abajo — ahí ya queda todo dentro de ese mismo curso, sin mezclarse con los demás.</p>
+    </div>
+
+    <div id="mis-programas">
+      <div class="section-title">Mis programas</div>
+      <div class="prog-list" id="misProgramasList"></div>
+    </div>
+
+    <div id="catalogo">
+      <div class="section-title">Catálogo completo</div>
+      <div class="prog-list" id="catalogoList"></div>
+    </div>
+
+    <div id="casos">
+      <div class="section-title">Casos industriales</div>
+      <div id="casoDetailBox"></div>
+      <div class="caso-list" id="casoList"></div>
+      <div id="casoFormBox" class="course-form hidden">
+        <div class="section-title" style="margin:0;">Agregar caso nuevo</div>
+        <form id="casoForm">
+          <div class="course-form-grid" style="margin-bottom:10px;">
+            <input id="casoTitulo" type="text" placeholder="Título del caso" required>
+            <input id="casoCategoria" type="text" placeholder="Categoría (ej. mineria, aviacion)" required>
+          </div>
+          <textarea id="casoContexto" placeholder="Contexto: qué está pasando, condiciones, historial..." required style="width:100%;min-height:80px;padding:10px 12px;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--ink);color:var(--text);font-family:inherit;font-size:13.5px;margin-bottom:10px;"></textarea>
+          <textarea id="casoDiagnostico" placeholder="Diagnóstico / respuesta esperada (se revela al final)" required style="width:100%;min-height:60px;padding:10px 12px;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--ink);color:var(--text);font-family:inherit;font-size:13.5px;margin-bottom:10px;"></textarea>
+          <button type="submit" class="btn btn-primary" id="casoBtn">Publicar caso</button>
+          <span class="msg" id="casoMsg"></span>
+        </form>
+      </div>
+    </div>
+  </main>
 </div>
 
 <div id="courseModal" class="modal-overlay hidden">
@@ -630,17 +711,147 @@
     sendBtn.disabled = false;
   });
 
+  const RUTAS = [
+    { nombre: 'Especialista en Confiabilidad de Activos', programas: ['Mantenimiento mecánico industrial','Ciclo de vida de un activo','Confiabilidad de activos (RCM)','TPM — Mantenimiento Productivo Total','Confiabilidad y costos de mantenimiento'] },
+    { nombre: 'Especialista en Integridad y Análisis de Fallas', programas: ['Soldadura industrial','Falla de materiales','Inspección de líneas y equipos de gas','Seguridad industrial'] },
+    { nombre: 'Especialista en Mantenimiento Aeronáutico', programas: ['Aerodinámica básica','Estructuras y fuselaje','Sistema hidráulico en aviación','Sistema neumático','Motores de aviación','Aviónica','Gestión de mantenimiento de aeronaves','Inglés técnico de aviación'] }
+  ];
+
+  function renderStats(programas, inscripciones){
+    const enProgreso = inscripciones.filter(i => i.estado === 'activo').length;
+    const completados = inscripciones.filter(i => i.estado === 'completado').length;
+    const inscritosIds = inscripciones.map(i => i.programa_id);
+    const disponibles = programas.length - inscritosIds.length;
+
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card"><div class="stat-num">${enProgreso}</div><div class="stat-label">En progreso</div></div>
+      <div class="stat-card"><div class="stat-num">${completados}</div><div class="stat-label">Completados</div></div>
+      <div class="stat-card"><div class="stat-num">${disponibles}</div><div class="stat-label">Disponibles</div></div>
+      <div class="stat-card"><div class="stat-num">${programas.length}</div><div class="stat-label">Programas totales</div></div>
+    `;
+  }
+
+  function renderRuta(programas, inscripciones){
+    const inscMap = {};
+    inscripciones.forEach(i => { inscMap[i.programa_id] = i; });
+    const tituloPorId = {};
+    programas.forEach(p => { tituloPorId[p.id] = p.titulo; });
+    const inscritosTitulos = new Set(inscripciones.map(i => tituloPorId[i.programa_id]).filter(Boolean));
+
+    const rutaActiva = RUTAS.find(r => r.programas.some(t => inscritosTitulos.has(t)));
+    const box = document.getElementById('rutaBox');
+    if (!rutaActiva){
+      box.innerHTML = '';
+      return;
+    }
+
+    const completadosSet = new Set(
+      inscripciones.filter(i => i.estado === 'completado').map(i => tituloPorId[i.programa_id])
+    );
+    const doneCount = rutaActiva.programas.filter(t => completadosSet.has(t)).length;
+
+    box.innerHTML = `
+      <div class="ruta-track">
+        <p class="ruta-track-title">Mi ruta: ${rutaActiva.nombre}</p>
+        <p class="ruta-track-sub">${doneCount} de ${rutaActiva.programas.length} programas completados</p>
+        <div class="ruta-steps">
+          ${rutaActiva.programas.map(t => `<div class="ruta-step ${completadosSet.has(t) ? 'done' : 'pending'}">${completadosSet.has(t) ? '✓ ' : ''}${t}</div>`).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadCasos(isInstructor){
+    document.getElementById('casoFormBox').classList.toggle('hidden', !isInstructor);
+    const { data: casos } = await supabase.from('casos').select('*').order('creado_en', { ascending: false });
+    const listEl = document.getElementById('casoList');
+
+    if (!casos || casos.length === 0){
+      listEl.innerHTML = '<p class="empty-note">Todavía no hay casos publicados. ' + (isInstructor ? 'Agrega el primero abajo.' : 'Vuelve pronto.') + '</p>';
+      return;
+    }
+
+    listEl.innerHTML = casos.map(c => `
+      <div class="caso-card" data-caso-id="${c.id}">
+        <div class="caso-tag">${c.categoria}</div>
+        <h3 class="caso-title">${c.titulo}</h3>
+        <span class="caso-diff">Dificultad ${'●'.repeat(c.dificultad)}${'○'.repeat(5 - c.dificultad)}</span>
+      </div>
+    `).join('');
+
+    listEl.querySelectorAll('.caso-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const caso = casos.find(c => c.id === card.dataset.casoId);
+        openCasoDetail(caso);
+      });
+    });
+  }
+
+  function openCasoDetail(caso){
+    const box = document.getElementById('casoDetailBox');
+    box.innerHTML = `
+      <div class="caso-detail">
+        <span class="caso-tag">${caso.categoria} · dificultad ${caso.dificultad}/5</span>
+        <h3>${caso.titulo}</h3>
+        <p>${caso.contexto}</p>
+        ${caso.datos_iniciales ? `<p><strong>Datos:</strong> ${caso.datos_iniciales}</p>` : ''}
+        <button class="btn btn-ghost" id="casoRevealBtn">Ver diagnóstico</button>
+        <div id="casoRevealBox" class="hidden caso-reveal"><strong>Diagnóstico:</strong> ${caso.diagnostico}</div>
+        <button class="btn btn-ghost" id="casoCloseBtn" style="margin-top:12px;">Cerrar caso</button>
+      </div>
+    `;
+    document.getElementById('casoRevealBtn').addEventListener('click', () => {
+      document.getElementById('casoRevealBox').classList.remove('hidden');
+    });
+    document.getElementById('casoCloseBtn').addEventListener('click', () => {
+      box.innerHTML = '';
+    });
+    box.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  document.getElementById('casoForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('casoBtn');
+    const msg = document.getElementById('casoMsg');
+    btn.disabled = true;
+    btn.textContent = 'Publicando…';
+
+    const { error } = await supabase.from('casos').insert({
+      titulo: document.getElementById('casoTitulo').value.trim(),
+      categoria: document.getElementById('casoCategoria').value.trim(),
+      contexto: document.getElementById('casoContexto').value.trim(),
+      diagnostico: document.getElementById('casoDiagnostico').value.trim()
+    });
+
+    if (!error){
+      msg.textContent = 'Caso publicado.';
+      msg.className = 'msg ok';
+      document.getElementById('casoForm').reset();
+      await loadCasos(true);
+    } else {
+      msg.textContent = 'No se pudo publicar: ' + error.message;
+      msg.className = 'msg err';
+    }
+    btn.disabled = false;
+    btn.textContent = 'Publicar caso';
+  });
+
   async function loadDashboard(user){
     document.getElementById('userEmail').textContent = user.email;
 
     const { data: perfil } = await supabase.from('usuarios').select('rol, nombre').eq('id', user.id).maybeSingle();
     const isInstructor = perfil && (perfil.rol === 'instructor' || perfil.rol === 'admin');
     currentUserName = (perfil && perfil.nombre) || user.email.split('@')[0];
+    document.getElementById('greetingText').textContent = 'Hola, ' + currentUserName;
 
     document.getElementById('instructorPanel').classList.toggle('hidden', !isInstructor);
 
     const { data: programas } = await supabase.from('programas').select('*').eq('activo', true).order('orden');
     const { data: inscripciones } = await supabase.from('inscripciones').select('*').eq('usuario_id', user.id);
+
+    renderStats(programas || [], inscripciones || []);
+    renderRuta(programas || [], inscripciones || []);
+    await loadCasos(isInstructor);
 
     const inscMap = {};
     (inscripciones || []).forEach(i => { inscMap[i.programa_id] = i; });
