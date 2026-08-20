@@ -77,10 +77,14 @@
   .session-meta{font-family:var(--font-mono);font-size:11.5px;color:var(--muted);}
   .badge-live{background:#E8483A;color:#fff;font-family:var(--font-mono);font-size:10px;padding:3px 8px;border-radius:20px;margin-left:8px;text-transform:uppercase;}
 
-  .modal-overlay{position:fixed;inset:0;background:rgba(11,37,69,0.85);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;}
-  .modal-box{background:#000;width:100%;max-width:960px;height:80vh;border-radius:8px;overflow:hidden;position:relative;}
-  .modal-box iframe{width:100%;height:100%;border:0;}
-  .modal-close{position:absolute;top:12px;right:12px;z-index:2;background:#fff;border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:16px;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(11,37,69,0.92);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .modal-box{background:#0B2545;width:100%;max-width:1040px;height:85vh;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;flex-shrink:0;}
+  .modal-head-title{color:var(--paper);font-family:var(--font-display);font-weight:600;font-size:15px;text-transform:uppercase;}
+  .modal-head-sub{color:#B9C3D2;font-family:var(--font-mono);font-size:11px;margin-top:2px;}
+  .modal-close{background:rgba(245,244,239,0.12);color:var(--paper);border:none;border-radius:6px;width:34px;height:34px;cursor:pointer;font-size:15px;flex-shrink:0;}
+  .modal-frame-wrap{flex:1;background:#000;}
+  .modal-frame-wrap iframe{width:100%;height:100%;border:0;}
 
   .instructor-panel{background:var(--blue);color:var(--paper);border-radius:6px;padding:22px 24px;margin-bottom:44px;}
   .instructor-panel .section-title{color:#FF9166;}
@@ -104,14 +108,31 @@
 
 <div id="loginPanel" class="panel hidden">
   <h1>Ingresar</h1>
-  <p>Te mandamos un enlace de acceso a tu correo — sin contraseñas que recordar.</p>
-  <form id="loginForm">
+  <p>Entra con tu correo y contraseña — funciona igual desde el celular, la tablet o la web.</p>
+  <form id="passwordForm">
     <div class="field">
-      <label for="loginEmail">Correo electrónico</label>
-      <input id="loginEmail" type="email" placeholder="tucorreo@ejemplo.com" required>
+      <label for="pwEmail">Correo electrónico</label>
+      <input id="pwEmail" type="email" placeholder="tucorreo@ejemplo.com" required>
     </div>
-    <button type="submit" class="btn btn-primary btn-block" id="loginBtn">Enviar enlace de acceso</button>
+    <div class="field">
+      <label for="pwPassword">Contraseña</label>
+      <input id="pwPassword" type="password" placeholder="Mínimo 6 caracteres" minlength="6" required>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block" id="loginBtn">Iniciar sesión</button>
+    <button type="button" class="btn btn-ghost btn-block" id="signupBtn" style="margin-top:10px;">Crear cuenta nueva</button>
     <p class="msg" id="loginMsg"></p>
+  </form>
+  <div style="text-align:center;margin-top:18px;">
+    <a href="#" id="toggleMagicLink" style="font-size:12.5px;color:var(--muted);text-decoration:underline;">O usa un enlace mágico por correo, sin contraseña</a>
+  </div>
+
+  <form id="magicForm" class="hidden" style="margin-top:18px;">
+    <div class="field">
+      <label for="magicEmail">Correo electrónico</label>
+      <input id="magicEmail" type="email" placeholder="tucorreo@ejemplo.com" required>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block" id="magicBtn">Enviar enlace de acceso</button>
+    <p class="msg" id="magicMsg"></p>
   </form>
 </div>
 
@@ -164,8 +185,16 @@
 
 <div id="jitsiModal" class="modal-overlay hidden">
   <div class="modal-box">
-    <button class="modal-close" id="jitsiClose">✕</button>
-    <iframe id="jitsiFrame" src="" allow="camera; microphone; fullscreen; display-capture; autoplay"></iframe>
+    <div class="modal-head">
+      <div>
+        <div class="modal-head-title" id="jitsiTitle">Clase en vivo</div>
+        <div class="modal-head-sub">IMC Academia — si quieres guardar la clase, usa "Más acciones → Grabar" en el menú de la videollamada</div>
+      </div>
+      <button class="modal-close" id="jitsiClose">✕ Salir</button>
+    </div>
+    <div class="modal-frame-wrap">
+      <iframe id="jitsiFrame" src="" allow="camera; microphone; fullscreen; display-capture; autoplay"></iframe>
+    </div>
   </div>
 </div>
 
@@ -215,7 +244,7 @@
     if (s.grabacion_url) {
       actionHTML = `<a class="btn btn-ghost" href="${s.grabacion_url}" target="_blank" rel="noopener">Ver grabación</a>`;
     } else {
-      actionHTML = `<button class="btn btn-primary" data-room="${s.room_name}">Unirse a la clase</button>`;
+      actionHTML = `<button class="btn btn-primary" data-room="${s.room_name}" data-titulo="${s.titulo.replace(/"/g,'&quot;')}">Unirse a la clase</button>`;
     }
     return `
       <div class="session-item">
@@ -227,8 +256,16 @@
       </div>`;
   }
 
-  function openJitsi(roomName){
-    document.getElementById('jitsiFrame').src = 'https://meet.jit.si/' + roomName;
+  let currentUserName = '';
+
+  function openJitsi(roomName, titulo){
+    document.getElementById('jitsiTitle').textContent = titulo || 'Clase en vivo';
+    const configParams = [
+      'config.prejoinPageEnabled=true',
+      'config.disableDeepLinking=true',
+      'userInfo.displayName="' + encodeURIComponent(currentUserName) + '"'
+    ].join('&');
+    document.getElementById('jitsiFrame').src = 'https://meet.jit.si/' + roomName + '#' + configParams;
     document.getElementById('jitsiModal').classList.remove('hidden');
   }
   function closeJitsi(){
@@ -256,7 +293,7 @@
     }
     sesiones.forEach(s => listEl.insertAdjacentHTML('beforeend', sessionItemHTML(s)));
     listEl.querySelectorAll('button[data-room]').forEach(btn => {
-      btn.addEventListener('click', () => openJitsi(btn.dataset.room));
+      btn.addEventListener('click', () => openJitsi(btn.dataset.room, btn.dataset.titulo));
     });
   }
 
@@ -302,8 +339,9 @@
   async function loadDashboard(user){
     document.getElementById('userEmail').textContent = user.email;
 
-    const { data: perfil } = await supabase.from('usuarios').select('rol').eq('id', user.id).maybeSingle();
+    const { data: perfil } = await supabase.from('usuarios').select('rol, nombre').eq('id', user.id).maybeSingle();
     const isInstructor = perfil && (perfil.rol === 'instructor' || perfil.rol === 'admin');
+    currentUserName = (perfil && perfil.nombre) || user.email.split('@')[0];
 
     const { data: programas } = await supabase.from('programas').select('*').eq('activo', true).order('orden');
     const { data: inscripciones } = await supabase.from('inscripciones').select('*').eq('usuario_id', user.id);
@@ -377,11 +415,69 @@
     else showLoggedOut();
   });
 
-  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  document.getElementById('toggleMagicLink').addEventListener('click', (e) => {
     e.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim();
+    document.getElementById('passwordForm').classList.toggle('hidden');
+    document.getElementById('magicForm').classList.toggle('hidden');
+    const isMagicVisible = !document.getElementById('magicForm').classList.contains('hidden');
+    e.target.textContent = isMagicVisible ? 'O entra con tu correo y contraseña' : 'O usa un enlace mágico por correo, sin contraseña';
+  });
+
+  document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('pwEmail').value.trim();
+    const password = document.getElementById('pwPassword').value;
     const btn = document.getElementById('loginBtn');
     const msg = document.getElementById('loginMsg');
+    btn.disabled = true;
+    btn.textContent = 'Ingresando…';
+    msg.textContent = '';
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error){
+      msg.textContent = 'Correo o contraseña incorrectos, o la cuenta aún no existe.';
+      msg.className = 'msg err';
+    }
+    btn.disabled = false;
+    btn.textContent = 'Iniciar sesión';
+  });
+
+  document.getElementById('signupBtn').addEventListener('click', async () => {
+    const email = document.getElementById('pwEmail').value.trim();
+    const password = document.getElementById('pwPassword').value;
+    const msg = document.getElementById('loginMsg');
+    const btn = document.getElementById('signupBtn');
+
+    if (!email || password.length < 6){
+      msg.textContent = 'Completa correo y una contraseña de al menos 6 caracteres.';
+      msg.className = 'msg err';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Creando cuenta…';
+    const { data, error } = await supabase.auth.signUp({ email, password });
+
+    if (error){
+      msg.textContent = 'No se pudo crear la cuenta: ' + error.message;
+      msg.className = 'msg err';
+    } else if (data.session){
+      msg.textContent = '¡Cuenta creada! Entrando…';
+      msg.className = 'msg ok';
+    } else {
+      msg.textContent = 'Cuenta creada. Revisa tu correo para confirmarla y luego inicia sesión.';
+      msg.className = 'msg ok';
+    }
+    btn.disabled = false;
+    btn.textContent = 'Crear cuenta nueva';
+  });
+
+  document.getElementById('magicForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('magicEmail').value.trim();
+    const btn = document.getElementById('magicBtn');
+    const msg = document.getElementById('magicMsg');
     btn.disabled = true;
     btn.textContent = 'Enviando…';
     msg.textContent = '';
