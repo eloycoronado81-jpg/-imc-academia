@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IMC Academia — Plataforma</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
@@ -378,6 +379,9 @@
     const listEl = document.getElementById('courseStudentsList');
     box.classList.remove('hidden');
 
+    const { data: programaRow } = await supabase.from('programas').select('titulo').eq('id', programaId).maybeSingle();
+    const programaTitulo = (programaRow && programaRow.titulo) || '';
+
     const { data: inscripciones } = await supabase
       .from('inscripciones')
       .select('*, usuarios(nombre, correo)')
@@ -394,7 +398,7 @@
       const done = i.estado === 'completado';
       const action = done
         ? '<span class="badge-done">Completado</span>'
-        : `<button class="btn btn-primary" data-inscripcion-id="${i.id}">Marcar completado</button>`;
+        : `<button class="btn btn-primary" data-inscripcion-id="${i.id}" data-nombre="${nombre.replace(/"/g,'&quot;')}" data-programa-titulo="${programaTitulo.replace(/"/g,'&quot;')}">Marcar completado</button>`;
       return `
         <div class="student-item">
           <div>
@@ -410,6 +414,8 @@
         btn.disabled = true;
         btn.textContent = 'Marcando…';
         const inscripcionId = btn.dataset.inscripcionId;
+        const nombreEst = btn.dataset.nombre;
+        const programaTit = btn.dataset.programaTitulo;
 
         const { error: updError } = await supabase
           .from('inscripciones')
@@ -423,7 +429,11 @@
           return;
         }
 
-        const { error: certError } = await supabase.from('certificados').insert({ inscripcion_id: inscripcionId });
+        const { error: certError } = await supabase.from('certificados').insert({
+          inscripcion_id: inscripcionId,
+          nombre_estudiante: nombreEst,
+          programa_titulo: programaTit
+        });
 
         if (certError){
           showToast('Se marcó completado, pero el certificado no se pudo emitir: ' + certError.message);
@@ -438,7 +448,7 @@
   async function openCertificate(inscripcionId){
     const { data: cert, error } = await supabase
       .from('certificados')
-      .select('*, inscripciones(programa_id, usuario_id, programas(titulo), usuarios(nombre))')
+      .select('*')
       .eq('inscripcion_id', inscripcionId)
       .maybeSingle();
 
@@ -447,9 +457,10 @@
       return;
     }
 
-    const nombre = (cert.inscripciones && cert.inscripciones.usuarios && cert.inscripciones.usuarios.nombre) || currentUserName;
-    const programa = (cert.inscripciones && cert.inscripciones.programas && cert.inscripciones.programas.titulo) || '';
+    const nombre = cert.nombre_estudiante || currentUserName;
+    const programa = cert.programa_titulo || '';
     const fecha = new Date(cert.fecha_emision).toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric' });
+    const verifyUrl = window.location.origin + '/verificar.html?codigo=' + cert.codigo_verificacion;
 
     document.getElementById('certContent').innerHTML = `
       <div class="cert-eyebrow">IMC Academia — Certificado de finalización</div>
@@ -458,9 +469,14 @@
       <div class="cert-title">completó satisfactoriamente el programa</div>
       <div class="cert-program">${programa}</div>
       <div class="cert-date">Emitido el ${fecha}</div>
-      <div class="cert-code">Código de verificación: ${cert.codigo_verificacion}</div>
+      <div id="certQr" style="margin:0 auto 18px;width:140px;"></div>
+      <div class="cert-code">Código de verificación: ${cert.codigo_verificacion}<br><a href="${verifyUrl}" target="_blank" rel="noopener" style="color:var(--accent-dark);">${verifyUrl}</a></div>
     `;
     document.getElementById('certModal').classList.remove('hidden');
+
+    if (window.QRCode){
+      new QRCode(document.getElementById('certQr'), { text: verifyUrl, width: 140, height: 140 });
+    }
   }
   document.getElementById('certModalClose').addEventListener('click', () => {
     document.getElementById('certModal').classList.add('hidden');

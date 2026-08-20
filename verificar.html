@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verificar certificado — IMC Academia</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --ink:#0E2226; --ink-2:#153230; --teal:#4FD8C4; --text:#DCEEEC; --text-dim:#9FC1BD;
+    --line:rgba(220,238,236,0.14); --ok:#6FE3A0; --err:#FF9E8A;
+    --font-display:'Space Grotesk',sans-serif; --font-body:'IBM Plex Sans',sans-serif; --font-mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ink);color:var(--text);font-family:var(--font-body);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  a{color:var(--teal);}
+
+  .box{max-width:460px;width:100%;}
+  .brand{font-family:var(--font-display);font-weight:700;font-size:19px;text-align:center;margin-bottom:36px;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .brand-mark{width:12px;height:12px;border:2px solid var(--teal);border-radius:50%;}
+
+  .panel{background:var(--ink-2);border:1px solid var(--line);border-radius:8px;padding:32px;}
+  .field{display:flex;gap:10px;margin-bottom:8px;}
+  .field input{flex:1;height:46px;padding:0 14px;border:1px solid var(--line);border-radius:3px;background:var(--ink);color:var(--text);font-family:var(--font-mono);font-size:14px;}
+  .btn{height:46px;padding:0 22px;background:var(--teal);color:#04211D;border:none;border-radius:3px;font-weight:600;cursor:pointer;}
+
+  .result{margin-top:28px;text-align:center;}
+  .result.hidden{display:none;}
+  .status-ok{color:var(--ok);font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px;}
+  .status-err{color:var(--err);font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px;}
+  .r-name{font-family:var(--font-display);font-weight:700;font-size:22px;margin-bottom:8px;}
+  .r-program{font-size:15px;color:var(--text-dim);margin-bottom:6px;}
+  .r-date{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);}
+</style>
+</head>
+<body>
+
+<div class="box">
+  <div class="brand"><span class="brand-mark"></span>IMC Academia — Verificación de certificados</div>
+  <div class="panel">
+    <div class="field">
+      <input id="codigoInput" type="text" placeholder="Código de verificación">
+      <button class="btn" id="verifyBtn">Verificar</button>
+    </div>
+    <div id="result" class="result hidden"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+  const supabase = createClient(
+    'https://lixivclmhbcdztqpydnl.supabase.co',
+    'sb_publishable_qnyiTwLqB0033E13lNuWpg_tuRWfJgM'
+  );
+
+  async function verify(codigo){
+    const resultEl = document.getElementById('result');
+    resultEl.classList.remove('hidden');
+    resultEl.innerHTML = '<p style="color:var(--text-dim);">Verificando…</p>';
+
+    const { data: cert } = await supabase.from('certificados').select('*').eq('codigo_verificacion', codigo.trim()).maybeSingle();
+
+    if (!cert){
+      resultEl.innerHTML = '<div class="status-err">No encontrado</div><p style="color:var(--text-dim);">Este código no corresponde a ningún certificado emitido por IMC Academia.</p>';
+      return;
+    }
+
+    const fecha = new Date(cert.fecha_emision).toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric' });
+    resultEl.innerHTML = `
+      <div class="status-ok">✓ Certificado válido</div>
+      <div class="r-name">${cert.nombre_estudiante || ''}</div>
+      <div class="r-program">${cert.programa_titulo || ''}</div>
+      <div class="r-date">Emitido el ${fecha} · IMC Academia</div>
+    `;
+  }
+
+  document.getElementById('verifyBtn').addEventListener('click', () => {
+    const codigo = document.getElementById('codigoInput').value;
+    if (codigo.trim()) verify(codigo);
+  });
+  document.getElementById('codigoInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('verifyBtn').click();
+  });
+
+  const params = new URLSearchParams(window.location.search);
+  const codigoParam = params.get('codigo');
+  if (codigoParam){
+    document.getElementById('codigoInput').value = codigoParam;
+    verify(codigoParam);
+  }
+</script>
+
+</body>
+</html>
