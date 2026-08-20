@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMC Academia — 5 propuestas de portada</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500;700&family=Cormorant+Garamond:wght@500;600;700&family=Bungee&family=Inter:wght@400;500;600;800&display=swap');
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',sans-serif;}
+
+  .proposal{min-height:92vh;display:flex;flex-direction:column;justify-content:center;padding:60px 8vw;position:relative;overflow:hidden;}
+  .label{position:absolute;top:24px;left:8vw;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.65;}
+  .btn{display:inline-block;padding:14px 28px;font-weight:600;font-size:14px;border-radius:3px;text-decoration:none;width:fit-content;}
+
+  /* ===== 1: PANEL DE INSTRUMENTOS ===== */
+  .p1{background:#0D1117;color:#E8ECF1;}
+  .p1 .label{color:#F2A93B;}
+  .p1 .grid-bg{position:absolute;inset:0;background-image:linear-gradient(#1B2330 1px,transparent 1px),linear-gradient(90deg,#1B2330 1px,transparent 1px);background-size:36px 36px;opacity:0.5;}
+  .p1-inner{position:relative;display:grid;grid-template-columns:1.1fr 0.9fr;gap:48px;align-items:center;}
+  .p1-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#F2A93B;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:18px;}
+  .p1-title{font-family:'Archivo Black',sans-serif;font-size:clamp(34px,4.5vw,54px);line-height:1.05;margin-bottom:18px;}
+  .p1-title span{color:#F2A93B;}
+  .p1-sub{color:#9AA4B2;font-size:16px;max-width:440px;margin-bottom:28px;}
+  .p1 .btn{background:#F2A93B;color:#1A1200;}
+  .p1-gauge{width:260px;height:260px;border-radius:50%;border:2px solid #2A3543;position:relative;margin:0 auto;display:flex;align-items:center;justify-content:center;}
+  .p1-gauge::before{content:'';position:absolute;inset:16px;border-radius:50%;border:1px solid #F2A93B44;}
+  .p1-needle{width:2px;height:90px;background:#F2A93B;position:absolute;bottom:50%;left:50%;transform-origin:bottom center;transform:translateX(-50%) rotate(35deg);}
+  .p1-gauge-label{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6B7684;position:absolute;bottom:38px;}
+
+  /* ===== 2: BITACORA TECNICA ===== */
+  .p2{background:#EDE7D9;color:#2B2620;background-image:repeating-linear-gradient(#DDD5C2 0px,#DDD5C2 1px,transparent 1px,transparent 32px);}
+  .p2 .label{color:#B23A2E;}
+  .p2-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#B23A2E;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:18px;}
+  .p2-title{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:clamp(28px,4vw,46px);line-height:1.15;margin-bottom:18px;max-width:640px;}
+  .p2-sub{font-family:'IBM Plex Mono',monospace;color:#5C5648;font-size:14.5px;max-width:480px;margin-bottom:28px;line-height:1.7;}
+  .p2 .btn{background:#2B2620;color:#EDE7D9;font-family:'IBM Plex Mono',monospace;}
+  .p2-stamp{position:absolute;top:70px;right:9vw;width:118px;height:118px;border:3px solid #B23A2E;border-radius:50%;display:flex;align-items:center;justify-content:center;transform:rotate(-14deg);color:#B23A2E;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;text-align:center;text-transform:uppercase;letter-spacing:0.04em;}
+
+  /* ===== 3: CREDENCIAL OFICIAL ===== */
+  .p3{background:#0F2340;color:#E9E2CE;}
+  .p3::before{content:'';position:absolute;inset:26px;border:1px solid #C9A24B77;pointer-events:none;}
+  .p3::after{content:'';position:absolute;inset:32px;border:1px solid #C9A24B33;pointer-events:none;}
+  .p3 .label{color:#C9A24B;}
+  .p3-inner{position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;}
+  .p3-seal{width:74px;height:74px;border-radius:50%;border:2px solid #C9A24B;display:flex;align-items:center;justify-content:center;margin-bottom:24px;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:26px;color:#C9A24B;}
+  .p3-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#C9A24B;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:16px;}
+  .p3-title{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:clamp(34px,5vw,58px);line-height:1.1;margin-bottom:18px;}
+  .p3-sub{color:#B9AF93;font-size:19px;max-width:480px;margin:0 auto 30px;font-family:'Cormorant Garamond',serif;}
+  .p3 .btn{background:transparent;color:#C9A24B;border:1.5px solid #C9A24B;}
+
+  /* ===== 4: TORRE DE CONTROL ===== */
+  .p4{background:#0E2226;color:#DCEEEC;}
+  .p4-rings{position:absolute;left:50%;top:50%;width:640px;height:640px;transform:translate(-50%,-50%);}
+  .p4-ring{position:absolute;inset:0;border:1px solid #2F5A57;border-radius:50%;}
+  .p4-ring:nth-child(2){inset:70px;}
+  .p4-ring:nth-child(3){inset:140px;}
+  .p4-ring:nth-child(4){inset:210px;}
+  .p4-sweep{position:absolute;left:50%;top:50%;width:320px;height:1px;background:linear-gradient(90deg,#4FD8C4,transparent);transform-origin:left center;animation:sweep 4s linear infinite;}
+  @keyframes sweep{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+  @media(prefers-reduced-motion:reduce){.p4-sweep{animation:none;}}
+  .p4-inner{position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;}
+  .p4-eyebrow{font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:12px;color:#4FD8C4;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:18px;}
+  .p4-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(32px,4.6vw,52px);line-height:1.1;margin-bottom:18px;}
+  .p4-title span{color:#4FD8C4;}
+  .p4-sub{color:#9FC1BD;font-size:16px;max-width:460px;margin:0 auto 30px;}
+  .p4 .btn{background:#4FD8C4;color:#04211D;}
+
+  /* ===== 5: PLACA DE IDENTIFICACION ===== */
+  .p5{background:#BEC2C4;color:#1D1F21;}
+  .p5-panel{position:relative;background:#D3D6D7;border:3px solid #1D1F21;max-width:760px;margin:0 auto;padding:56px 48px;}
+  .p5-panel::before,.p5-panel::after,.p5-rivet-tl,.p5-rivet-br{content:'';position:absolute;width:10px;height:10px;border-radius:50%;background:#1D1F21;}
+  .p5-panel::before{top:14px;left:14px;}
+  .p5-panel::after{top:14px;right:14px;}
+  .p5-rivet-tl{bottom:14px;left:14px;}
+  .p5-rivet-br{bottom:14px;right:14px;}
+  .p5-stripes{height:10px;background:repeating-linear-gradient(45deg,#F4B400,#F4B400 12px,#1D1F21 12px,#1D1F21 24px);margin-bottom:26px;}
+  .p5-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#5B5F61;margin-bottom:14px;}
+  .p5-title{font-family:'Bungee',sans-serif;font-size:clamp(26px,3.6vw,42px);line-height:1.2;margin-bottom:18px;text-transform:uppercase;}
+  .p5-sub{font-size:15.5px;color:#3C3F41;max-width:460px;margin-bottom:26px;}
+  .p5 .btn{background:#1D1F21;color:#F4B400;}
+</style>
+</head>
+<body>
+
+<section class="proposal p1">
+  <div class="grid-bg"></div>
+  <div class="label">Propuesta 1 — Panel de instrumentos</div>
+  <div class="p1-inner">
+    <div>
+      <div class="p1-eyebrow">Perú · formación técnica</div>
+      <h1 class="p1-title">Fórmate como quien <span>opera</span> el equipo</h1>
+      <p class="p1-sub">18 programas en mantenimiento industrial y aviación. Contenido de gente que ha estado frente al panel, no solo en el aula.</p>
+      <a class="btn" href="#">Unirme a la lista de espera</a>
+    </div>
+    <div class="p1-gauge">
+      <div class="p1-needle"></div>
+      <div class="p1-gauge-label">NIVEL DE DOMINIO</div>
+    </div>
+  </div>
+</section>
+
+<section class="proposal p2">
+  <div class="label">Propuesta 2 — Bitácora técnica</div>
+  <div class="p2-stamp">Verificado en campo</div>
+  <div class="p2-eyebrow">Cuaderno de bitácora · IMC</div>
+  <h1 class="p2-title">Lo que se aprende en planta, ahora en un curso.</h1>
+  <p class="p2-sub">Mantenimiento industrial y aviación. 18 entradas del cuaderno, convertidas en programas online.</p>
+  <a class="btn" href="#">Unirme a la lista de espera</a>
+</section>
+
+<section class="proposal p3">
+  <div class="label">Propuesta 3 — Credencial oficial</div>
+  <div class="p3-inner">
+    <div class="p3-seal">IMC</div>
+    <div class="p3-eyebrow">Certificación técnica · Perú</div>
+    <h1 class="p3-title">Una formación que se puede acreditar</h1>
+    <p class="p3-sub">Dieciocho programas en mantenimiento industrial y aviación, con certificado al finalizar.</p>
+    <a class="btn" href="#">Unirme a la lista de espera</a>
+  </div>
+</section>
+
+<section class="proposal p4">
+  <div class="p4-rings"><div class="p4-ring"></div><div class="p4-ring"></div><div class="p4-ring"></div><div class="p4-ring"></div><div class="p4-sweep"></div></div>
+  <div class="label">Propuesta 4 — Torre de control</div>
+  <div class="p4-inner">
+    <div class="p4-eyebrow">Señal en vivo · Perú</div>
+    <h1 class="p4-title">Visibilidad total sobre <span>tu formación</span></h1>
+    <p class="p4-sub">Mantenimiento industrial y aviación, monitoreado de cerca — igual que un equipo en operación.</p>
+    <a class="btn" href="#">Unirme a la lista de espera</a>
+  </div>
+</section>
+
+<section class="proposal p5">
+  <div class="label" style="color:#5B5F61;">Propuesta 5 — Placa de identificación</div>
+  <div class="p5-panel">
+    <div class="p5-rivet-tl"></div><div class="p5-rivet-br"></div>
+    <div class="p5-stripes"></div>
+    <div class="p5-eyebrow">Modelo IMC-2026 · Perú</div>
+    <h1 class="p5-title">Certificado para el trabajo real</h1>
+    <p class="p5-sub">18 programas de mantenimiento industrial y aviación. Hecho para durar, como el equipo del que hablan.</p>
+    <a class="btn" href="#">Unirme a la lista de espera</a>
+  </div>
+</section>
+
+</body>
+</html>
