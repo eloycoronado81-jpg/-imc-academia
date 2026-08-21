@@ -147,6 +147,21 @@
   .ai-send{height:40px;padding:0 16px;background:var(--teal);color:#04211D;border:none;border-radius:var(--radius);cursor:pointer;font-weight:600;}
   .ai-send:disabled{opacity:0.6;}
 
+  /* ===== Selector de perfil ===== */
+  .profile-selector{max-width:720px;margin:70px auto;padding:0 20px;text-align:center;}
+  .profile-selector h1{font-family:var(--font-display);font-weight:700;font-size:26px;text-transform:uppercase;margin:0 0 8px;}
+  .profile-selector p{color:var(--muted);font-size:14.5px;margin:0 0 34px;}
+  .profile-cards{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:600px){.profile-cards{grid-template-columns:1fr;}}
+  .profile-card{background:var(--ink-2);border:1px solid var(--line-strong);border-radius:10px;padding:34px 24px;cursor:pointer;transition:border-color .15s, transform .15s;text-align:left;}
+  .profile-card:hover{border-color:var(--teal);transform:translateY(-2px);}
+  .profile-card-icon{font-size:30px;margin-bottom:16px;}
+  .profile-card-label{font-family:var(--font-mono);font-size:11px;color:var(--teal);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
+  .profile-card-title{font-family:var(--font-display);font-weight:700;font-size:21px;margin:0 0 8px;}
+  .profile-card-desc{color:var(--muted);font-size:13.5px;margin:0;}
+  .back-to-selector{display:block;text-align:center;font-size:12.5px;color:var(--muted);text-decoration:none;margin-bottom:18px;}
+  .back-to-selector:hover{color:var(--text);}
+
   /* ===== Campus layout ===== */
   .campus{display:flex;min-height:calc(100vh - 66px);}
   .sidebar{width:220px;flex-shrink:0;background:var(--ink-2);border-right:1px solid var(--line);padding:24px 16px;display:flex;flex-direction:column;position:sticky;top:66px;height:calc(100vh - 66px);}
@@ -204,9 +219,29 @@
 
 <div id="loading">Cargando…</div>
 
+<div id="profileSelector" class="profile-selector hidden">
+  <h1>Bienvenido a IMC Academia</h1>
+  <p>Para una mejor experiencia, elige tu perfil:</p>
+  <div class="profile-cards">
+    <div class="profile-card" id="chooseAlumno">
+      <div class="profile-card-icon">🎓</div>
+      <div class="profile-card-label">Campus</div>
+      <h2 class="profile-card-title">Alumnos</h2>
+      <p class="profile-card-desc">Ingresa a tus cursos, entrega tareas y revisa tus certificados.</p>
+    </div>
+    <div class="profile-card" id="chooseInstructor">
+      <div class="profile-card-icon">🧑‍🏫</div>
+      <div class="profile-card-label">Campus</div>
+      <h2 class="profile-card-title">Instructores</h2>
+      <p class="profile-card-desc">Programa clases, publica material, califica entregas y gestiona tus cursos.</p>
+    </div>
+  </div>
+</div>
+
 <div id="loginPanel" class="panel hidden">
-  <h1>Ingresar</h1>
-  <p>Entra con tu correo y contraseña — funciona igual desde el celular, la tablet o la web.</p>
+  <a href="#" id="backToSelector" class="back-to-selector">← Elegir otro perfil</a>
+  <h1 id="loginTitle">Ingresar</h1>
+  <p id="loginSubtitle">Entra con tu correo y contraseña — funciona igual desde el celular, la tablet o la web.</p>
   <form id="passwordForm">
     <div class="field">
       <label for="pwEmail">Correo electrónico</label>
@@ -242,6 +277,8 @@
       <a href="#mis-programas">Mis programas</a>
       <a href="#catalogo">Catálogo</a>
       <a href="#casos">Casos industriales</a>
+      <a href="#calificaciones">Calificaciones</a>
+      <a href="#mi-perfil">Mi Perfil</a>
     </nav>
     <div class="sidebar-foot">
       <div class="sidebar-email" id="userEmail"></div>
@@ -292,6 +329,31 @@
         </form>
       </div>
     </div>
+
+    <div id="calificaciones">
+      <div class="section-title">Calificaciones</div>
+      <div id="calificacionesBox" class="prog-list" style="margin-bottom:32px;"></div>
+    </div>
+
+    <div id="mi-perfil">
+      <div class="section-title">Mi perfil</div>
+      <div class="course-form" style="max-width:480px;">
+        <div class="field">
+          <label for="perfilNombre">Nombre</label>
+          <input id="perfilNombre" type="text">
+        </div>
+        <div class="field">
+          <label for="perfilCorreo">Correo</label>
+          <input id="perfilCorreo" type="text" disabled style="opacity:0.6;">
+        </div>
+        <div class="field">
+          <label for="perfilRol">Rol</label>
+          <input id="perfilRol" type="text" disabled style="opacity:0.6;">
+        </div>
+        <button type="button" class="btn btn-primary" id="perfilGuardarBtn">Guardar cambios</button>
+        <span class="msg" id="perfilMsg"></span>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -309,19 +371,39 @@
         <div class="section-title" style="margin:0;">Programar nueva clase</div>
         <form id="courseSessionForm">
           <div class="course-form-grid">
+            <input id="courseSessionModulo" type="text" placeholder="Módulo (ej. Módulo 1)" value="Módulo 1" required>
             <input id="courseSessionTitulo" type="text" placeholder="Título de la clase" required>
             <input id="courseSessionFecha" type="datetime-local" required>
+            <input id="courseSessionMaterialTitulo" type="text" placeholder="Título del material (opcional)">
+            <input id="courseSessionMaterialUrl" type="text" placeholder="Link del material PDF (opcional)" style="grid-column:1/-1;">
           </div>
           <button type="submit" class="btn btn-primary" id="courseSessionBtn" style="margin-top:12px;">Programar</button>
           <span class="msg" id="courseSessionMsg"></span>
         </form>
       </div>
 
-      <div class="section-title">Próximas clases</div>
-      <div class="prog-list" id="courseUpcomingList" style="margin-bottom:32px;"></div>
+      <div class="section-title">Contenido del curso</div>
+      <div id="courseModulesBox" style="margin-bottom:32px;"></div>
 
       <div class="section-title">Grabaciones</div>
       <div class="prog-list" id="courseRecordingsList" style="margin-bottom:32px;"></div>
+
+      <div id="tareaFormBox" class="course-form hidden">
+        <div class="section-title" style="margin:0;">Crear tarea</div>
+        <form id="tareaForm">
+          <div class="course-form-grid">
+            <input id="tareaModulo" type="text" placeholder="Módulo (ej. Módulo 1)" value="Módulo 1" required>
+            <input id="tareaTitulo" type="text" placeholder="Título de la tarea" required>
+            <input id="tareaCierre" type="datetime-local" required>
+          </div>
+          <textarea id="tareaDescripcion" placeholder="Instrucciones de la tarea..." style="width:100%;min-height:70px;padding:10px 12px;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--ink);color:var(--text);font-family:inherit;font-size:13.5px;margin-top:10px;"></textarea>
+          <button type="submit" class="btn btn-primary" id="tareaBtn" style="margin-top:12px;">Crear tarea</button>
+          <span class="msg" id="tareaMsg"></span>
+        </form>
+      </div>
+
+      <div class="section-title">Tareas</div>
+      <div id="tareasBox" style="margin-bottom:32px;"></div>
 
       <div id="courseStudentsBox" class="hidden">
         <div class="section-title">Estudiantes inscritos</div>
@@ -489,7 +571,7 @@
   document.getElementById('jitsiClose').addEventListener('click', closeJitsi);
 
   async function loadCourseSesiones(programaId){
-    const upcomingEl = document.getElementById('courseUpcomingList');
+    const modulesEl = document.getElementById('courseModulesBox');
     const recEl = document.getElementById('courseRecordingsList');
 
     const { data: sesiones } = await supabase
@@ -498,21 +580,139 @@
       .eq('programa_id', programaId)
       .order('fecha_hora', { ascending: true });
 
-    const upcoming = (sesiones || []).filter(s => !s.grabacion_url);
     const grabadas = (sesiones || []).filter(s => s.grabacion_url);
-
-    upcomingEl.innerHTML = upcoming.length
-      ? upcoming.map(s => sessionItemHTML(s, false)).join('')
-      : '<p class="empty-note">Aún no hay clases programadas para este curso.</p>';
-
     recEl.innerHTML = grabadas.length
       ? grabadas.map(s => sessionItemHTML(s, true)).join('')
       : '<p class="empty-note">Todavía no hay grabaciones disponibles.</p>';
 
-    upcomingEl.querySelectorAll('button[data-room]').forEach(btn => {
+    const porModulo = {};
+    (sesiones || []).filter(s => !s.grabacion_url).forEach(s => {
+      const mod = s.modulo || 'Módulo 1';
+      if (!porModulo[mod]) porModulo[mod] = [];
+      porModulo[mod].push(s);
+    });
+
+    const modulos = Object.keys(porModulo);
+    if (modulos.length === 0){
+      modulesEl.innerHTML = '<p class="empty-note">Aún no hay contenido programado para este curso.</p>';
+    } else {
+      modulesEl.innerHTML = modulos.map(mod => {
+        const items = porModulo[mod].map(s => {
+          const material = s.material_url
+            ? `<a class="btn btn-ghost" href="${s.material_url}" target="_blank" rel="noopener" style="margin-right:8px;">📄 ${s.material_titulo || 'Material'}</a>`
+            : '';
+          return `
+            <div class="session-item">
+              <div>
+                <p class="session-name">${s.titulo}</p>
+                <span class="session-meta">${new Date(s.fecha_hora).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' })}</span>
+              </div>
+              <div>${material}<button class="btn btn-primary" data-room="${s.room_name}" data-titulo="${s.titulo.replace(/"/g,'&quot;')}">Unirse</button></div>
+            </div>`;
+        }).join('');
+        return `<div style="margin-bottom:18px;"><p style="font-family:var(--font-mono);font-size:11.5px;color:var(--teal);text-transform:uppercase;margin:0 0 8px;">${mod}</p><div class="prog-list" style="margin-bottom:0;">${items}</div></div>`;
+      }).join('');
+    }
+
+    modulesEl.querySelectorAll('button[data-room]').forEach(btn => {
       btn.addEventListener('click', () => {
         document.getElementById('courseModal').classList.add('hidden');
         openJitsi(btn.dataset.room, btn.dataset.titulo);
+      });
+    });
+  }
+
+  async function loadTareas(programaId, userId, isInstructor){
+    document.getElementById('tareaFormBox').classList.toggle('hidden', !isInstructor);
+    const box = document.getElementById('tareasBox');
+
+    const { data: tareas } = await supabase
+      .from('tareas')
+      .select('*')
+      .eq('programa_id', programaId)
+      .order('fecha_cierre', { ascending: true });
+
+    if (!tareas || tareas.length === 0){
+      box.innerHTML = '<p class="empty-note">Aún no hay tareas asignadas en este curso.</p>';
+      return;
+    }
+
+    let entregasMap = {};
+    if (!isInstructor){
+      const { data: entregas } = await supabase.from('entregas_tareas').select('*').eq('usuario_id', userId);
+      (entregas || []).forEach(e => { entregasMap[e.tarea_id] = e; });
+    }
+
+    box.innerHTML = tareas.map(t => {
+      const cierre = new Date(t.fecha_cierre).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' });
+      const entrega = entregasMap[t.id];
+      const estado = isInstructor ? '' : (entrega ? '<span class="badge-done">Entregado</span>' : '');
+      return `
+        <div class="caso-detail" style="margin-bottom:14px;">
+          <span class="caso-tag">${t.modulo}</span>
+          <h3 style="margin:8px 0 6px;font-size:16px;">${t.titulo} ${estado}</h3>
+          <p style="margin:0 0 8px;color:var(--muted);font-size:13px;">${t.descripcion || ''}</p>
+          <p style="margin:0 0 12px;font-family:var(--font-mono);font-size:11.5px;color:var(--muted);">Cierra: ${cierre}</p>
+          ${isInstructor ? `<button class="btn btn-ghost" data-view-entregas="${t.id}">Ver entregas</button><div id="entregas-${t.id}" style="margin-top:10px;"></div>` : (entrega
+            ? `<p style="font-size:13px;color:var(--muted);margin-bottom:6px;">Tu entrega: "${entrega.contenido.slice(0,120)}${entrega.contenido.length>120?'…':''}"</p>${entrega.nota != null ? `<p style="font-size:14px;font-weight:600;color:var(--teal);margin:0 0 4px;">Nota: ${entrega.nota}/20</p>${entrega.comentario_instructor ? `<p style="font-size:13px;color:var(--muted);margin:0;">Comentario: ${entrega.comentario_instructor}</p>` : ''}` : '<span class="student-meta">Aún sin calificar</span>'}`
+            : `<textarea id="entrega-texto-${t.id}" placeholder="Escribe tu entrega aquí..." style="width:100%;min-height:70px;padding:10px 12px;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--ink);color:var(--text);font-family:inherit;font-size:13.5px;"></textarea><button class="btn btn-primary" data-submit-tarea="${t.id}" style="margin-top:8px;">Entregar</button><span class="msg" id="entrega-msg-${t.id}"></span>`
+          )}
+        </div>`;
+    }).join('');
+
+    box.querySelectorAll('button[data-submit-tarea]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const tareaId = btn.dataset.submitTarea;
+        const texto = document.getElementById('entrega-texto-' + tareaId).value.trim();
+        const msg = document.getElementById('entrega-msg-' + tareaId);
+        if (!texto){ msg.textContent = 'Escribe algo antes de entregar.'; msg.className = 'msg err'; return; }
+        btn.disabled = true;
+        const { error } = await supabase.from('entregas_tareas').insert({ tarea_id: tareaId, usuario_id: userId, contenido: texto });
+        if (!error){
+          showToast('Tarea entregada.');
+          await loadTareas(currentCourseId, userId, isInstructor);
+        } else {
+          msg.textContent = 'No se pudo entregar: ' + error.message;
+          msg.className = 'msg err';
+          btn.disabled = false;
+        }
+      });
+    });
+
+    box.querySelectorAll('button[data-view-entregas]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const tareaId = btn.dataset.viewEntregas;
+        const target = document.getElementById('entregas-' + tareaId);
+        const { data: entregas } = await supabase.from('entregas_tareas').select('*, usuarios(nombre)').eq('tarea_id', tareaId);
+        if (!entregas || entregas.length === 0){
+          target.innerHTML = '<p class="empty-note">Nadie ha entregado todavía.</p>';
+          return;
+        }
+        target.innerHTML = entregas.map(e => `
+          <div class="student-item" style="flex-direction:column;align-items:stretch;">
+            <p class="student-name">${(e.usuarios && e.usuarios.nombre) || 'Alumno'}</p>
+            <span class="student-meta" style="margin-bottom:8px;">${e.contenido}</span>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <input type="number" min="0" max="20" step="0.5" value="${e.nota != null ? e.nota : ''}" placeholder="Nota /20" id="nota-${e.id}" style="width:90px;height:36px;padding:0 10px;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--ink);color:var(--text);">
+              <input type="text" value="${e.comentario_instructor || ''}" placeholder="Comentario (opcional)" id="coment-${e.id}" style="flex:1;min-width:160px;height:36px;padding:0 10px;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--ink);color:var(--text);">
+              <button class="btn btn-primary" data-calificar="${e.id}">Guardar nota</button>
+            </div>
+          </div>`).join('');
+
+        target.querySelectorAll('button[data-calificar]').forEach(cbtn => {
+          cbtn.addEventListener('click', async () => {
+            const entregaId = cbtn.dataset.calificar;
+            const nota = parseFloat(document.getElementById('nota-' + entregaId).value);
+            const comentario = document.getElementById('coment-' + entregaId).value.trim();
+            if (isNaN(nota) || nota < 0 || nota > 20){ showToast('Ingresa una nota válida entre 0 y 20.'); return; }
+            cbtn.disabled = true;
+            const { error } = await supabase.from('entregas_tareas').update({
+              nota: nota, comentario_instructor: comentario, calificado_en: new Date().toISOString()
+            }).eq('id', entregaId);
+            if (!error){ showToast('Nota guardada.'); } else { showToast('No se pudo guardar: ' + error.message); }
+            cbtn.disabled = false;
+          });
+        });
       });
     });
   }
@@ -671,6 +871,7 @@
     await loadCourseSesiones(programaId);
     await loadPizarra(programaId);
     await loadMisNotas(programaId, userId);
+    await loadTareas(programaId, userId, isInstructor);
     if (isInstructor){
       await loadCourseStudents(programaId);
     }
@@ -734,8 +935,11 @@
 
       const { error } = await supabase.from('sesiones').insert({
         programa_id: currentCourseId,
+        modulo: document.getElementById('courseSessionModulo').value.trim() || 'Módulo 1',
         titulo: document.getElementById('courseSessionTitulo').value.trim(),
         fecha_hora: new Date(document.getElementById('courseSessionFecha').value).toISOString(),
+        material_titulo: document.getElementById('courseSessionMaterialTitulo').value.trim() || null,
+        material_url: document.getElementById('courseSessionMaterialUrl').value.trim() || null,
         creado_por: userId
       });
 
@@ -743,6 +947,7 @@
         msg.textContent = 'Clase programada.';
         msg.className = 'msg ok';
         form.reset();
+        document.getElementById('courseSessionModulo').value = 'Módulo 1';
         await loadCourseSesiones(currentCourseId);
       } else {
         msg.textContent = 'No se pudo programar. Intenta de nuevo.';
@@ -750,6 +955,37 @@
       }
       btn.disabled = false;
       btn.textContent = 'Programar';
+    };
+
+    const tareaForm = document.getElementById('tareaForm');
+    tareaForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('tareaBtn');
+      const msg = document.getElementById('tareaMsg');
+      btn.disabled = true;
+      btn.textContent = 'Creando…';
+
+      const { error } = await supabase.from('tareas').insert({
+        programa_id: currentCourseId,
+        modulo: document.getElementById('tareaModulo').value.trim() || 'Módulo 1',
+        titulo: document.getElementById('tareaTitulo').value.trim(),
+        descripcion: document.getElementById('tareaDescripcion').value.trim(),
+        fecha_cierre: new Date(document.getElementById('tareaCierre').value).toISOString(),
+        creado_por: userId
+      });
+
+      if (!error){
+        msg.textContent = 'Tarea creada.';
+        msg.className = 'msg ok';
+        tareaForm.reset();
+        document.getElementById('tareaModulo').value = 'Módulo 1';
+        await loadTareas(currentCourseId, userId, isInstructor);
+      } else {
+        msg.textContent = 'No se pudo crear: ' + error.message;
+        msg.className = 'msg err';
+      }
+      btn.disabled = false;
+      btn.textContent = 'Crear tarea';
     };
   }
 
@@ -941,6 +1177,72 @@
     btn.textContent = 'Publicar caso';
   });
 
+  async function loadCalificacionesOverview(userId, isInstructor){
+    const box = document.getElementById('calificacionesBox');
+
+    if (!isInstructor){
+      const { data: entregas } = await supabase
+        .from('entregas_tareas')
+        .select('*, tareas(titulo, programa_id, programas(titulo))')
+        .eq('usuario_id', userId)
+        .order('entregado_en', { ascending: false });
+
+      if (!entregas || entregas.length === 0){
+        box.innerHTML = '<p class="empty-note">Aún no tienes entregas registradas.</p>';
+        return;
+      }
+      box.innerHTML = entregas.map(e => {
+        const tarea = e.tareas || {};
+        const programaTitulo = (tarea.programas && tarea.programas.titulo) || '';
+        const notaTxt = e.nota != null ? `${e.nota}/20` : 'Sin calificar';
+        return `<div class="prog-item"><div><p class="prog-name">${tarea.titulo || ''}</p><span class="prog-meta">${programaTitulo}</span></div><span style="font-weight:600;color:${e.nota != null ? 'var(--teal)' : 'var(--muted)'};">${notaTxt}</span></div>`;
+      }).join('');
+    } else {
+      const { data: entregas } = await supabase
+        .from('entregas_tareas')
+        .select('*, usuarios(nombre), tareas(titulo, programas(titulo))')
+        .order('entregado_en', { ascending: false })
+        .limit(50);
+
+      if (!entregas || entregas.length === 0){
+        box.innerHTML = '<p class="empty-note">Aún no hay entregas de alumnos.</p>';
+        return;
+      }
+      box.innerHTML = entregas.map(e => {
+        const tarea = e.tareas || {};
+        const programaTitulo = (tarea.programas && tarea.programas.titulo) || '';
+        const alumno = (e.usuarios && e.usuarios.nombre) || 'Alumno';
+        const notaTxt = e.nota != null ? `${e.nota}/20` : 'Pendiente';
+        return `<div class="prog-item"><div><p class="prog-name">${alumno} — ${tarea.titulo || ''}</p><span class="prog-meta">${programaTitulo}</span></div><span style="font-weight:600;color:${e.nota != null ? 'var(--teal)' : '#FF9E8A'};">${notaTxt}</span></div>`;
+      }).join('');
+    }
+  }
+
+  async function loadPerfil(user, nombreActual, rol){
+    document.getElementById('perfilNombre').value = nombreActual || '';
+    document.getElementById('perfilCorreo').value = user.email;
+    document.getElementById('perfilRol').value = rol === 'instructor' || rol === 'admin' ? 'Instructor' : 'Estudiante';
+
+    document.getElementById('perfilGuardarBtn').onclick = async () => {
+      const btn = document.getElementById('perfilGuardarBtn');
+      const msg = document.getElementById('perfilMsg');
+      const nuevoNombre = document.getElementById('perfilNombre').value.trim();
+      if (!nuevoNombre){ msg.textContent = 'El nombre no puede quedar vacío.'; msg.className = 'msg err'; return; }
+      btn.disabled = true;
+      const { error } = await supabase.from('usuarios').update({ nombre: nuevoNombre }).eq('id', user.id);
+      if (!error){
+        currentUserName = nuevoNombre;
+        document.getElementById('greetingText').textContent = 'Hola, ' + nuevoNombre;
+        msg.textContent = 'Perfil actualizado.';
+        msg.className = 'msg ok';
+      } else {
+        msg.textContent = 'No se pudo guardar: ' + error.message;
+        msg.className = 'msg err';
+      }
+      btn.disabled = false;
+    };
+  }
+
   async function loadDashboard(user){
     document.getElementById('userEmail').textContent = user.email;
 
@@ -950,6 +1252,8 @@
     document.getElementById('greetingText').textContent = 'Hola, ' + currentUserName;
 
     document.getElementById('instructorPanel').classList.toggle('hidden', !isInstructor);
+    await loadCalificacionesOverview(user.id, isInstructor);
+    await loadPerfil(user, currentUserName, perfil && perfil.rol);
 
     const { data: programas } = await supabase.from('programas').select('*').eq('activo', true).order('orden');
     const { data: inscripciones } = await supabase.from('inscripciones').select('*').eq('usuario_id', user.id);
@@ -1019,6 +1323,7 @@
     await ensureProfile(user);
     await loadDashboard(user);
     loadingEl.classList.add('hidden');
+    document.getElementById('profileSelector').classList.add('hidden');
     loginPanel.classList.add('hidden');
     dashboard.classList.remove('hidden');
     document.getElementById('aiFab').classList.remove('hidden');
@@ -1027,10 +1332,31 @@
   function showLoggedOut(){
     loadingEl.classList.add('hidden');
     dashboard.classList.add('hidden');
-    loginPanel.classList.remove('hidden');
+    loginPanel.classList.add('hidden');
+    document.getElementById('profileSelector').classList.remove('hidden');
     document.getElementById('aiFab').classList.add('hidden');
     document.getElementById('aiPanel').classList.add('hidden');
   }
+
+  function showLoginFor(perfilTipo){
+    document.getElementById('profileSelector').classList.add('hidden');
+    loginPanel.classList.remove('hidden');
+    if (perfilTipo === 'instructor'){
+      document.getElementById('loginTitle').textContent = 'Ingresar — Instructores';
+      document.getElementById('loginSubtitle').textContent = 'Programa clases, publica material y califica entregas.';
+    } else {
+      document.getElementById('loginTitle').textContent = 'Ingresar — Alumnos';
+      document.getElementById('loginSubtitle').textContent = 'Entra a tus cursos, entrega tareas y revisa tus certificados.';
+    }
+  }
+
+  document.getElementById('chooseAlumno').addEventListener('click', () => showLoginFor('alumno'));
+  document.getElementById('chooseInstructor').addEventListener('click', () => showLoginFor('instructor'));
+  document.getElementById('backToSelector').addEventListener('click', (e) => {
+    e.preventDefault();
+    loginPanel.classList.add('hidden');
+    document.getElementById('profileSelector').classList.remove('hidden');
+  });
 
   const { data: { session } } = await supabase.auth.getSession();
   if (session){
