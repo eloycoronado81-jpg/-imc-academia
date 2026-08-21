@@ -44,6 +44,12 @@
   @media(min-width:760px){.navlinks{display:flex;}}
   .navlinks a{text-decoration:none;transition:color .15s;}
   .navlinks a:hover{color:var(--text);}
+
+  .nav-dropdown{position:relative;}
+  .nav-dropdown-panel{position:absolute;top:calc(100% + 14px);left:50%;transform:translateX(-50%);background:var(--ink-2);border:1px solid var(--line-strong);border-radius:8px;padding:10px;min-width:220px;display:none;flex-direction:column;gap:2px;box-shadow:0 12px 30px rgba(0,0,0,0.4);}
+  .nav-dropdown:hover .nav-dropdown-panel{display:flex;}
+  .nav-dropdown-panel a{padding:9px 12px;border-radius:5px;font-size:13.5px;}
+  .nav-dropdown-panel a:hover{background:var(--ink-3);}
   .nav-cta{display:none;}
   @media(min-width:760px){.nav-cta{display:inline-flex;}}
 
@@ -186,7 +192,16 @@
   <div class="nav-inner">
     <div class="brand"><span class="brand-mark"></span>IMC Academia</div>
     <nav class="navlinks">
-      <a href="#programas">Programas</a>
+      <div class="nav-dropdown">
+        <a href="#programas">Programas ▾</a>
+        <div class="nav-dropdown-panel">
+          <a href="#escuela-mantenimiento">⚙️ Mantenimiento</a>
+          <a href="#escuela-confiabilidad">📊 Confiabilidad</a>
+          <a href="#escuela-integridad">🔬 Integridad</a>
+          <a href="#escuela-energia">⚡ Energía y Minería</a>
+          <a href="#escuela-aeronautica">✈️ Aeronáutica</a>
+        </div>
+      </div>
       <a href="#por-que">Por qué nosotros</a>
       <a href="#fundador">Fundador</a>
       <a href="#como-funciona">Cómo funciona</a>
@@ -242,27 +257,27 @@
       <p class="section-sub">Cada escuela agrupa los programas de una misma especialidad — para que elijas por dónde entrar, no que te pierdas en una lista de 18.</p>
     </div>
     <div class="schools-grid">
-      <div class="school-card">
+      <div class="school-card" id="escuela-mantenimiento">
         <div class="school-icon">⚙️</div>
         <p class="school-name">Mantenimiento</p>
         <span class="school-count">4 programas</span>
       </div>
-      <div class="school-card">
+      <div class="school-card" id="escuela-confiabilidad">
         <div class="school-icon">📊</div>
         <p class="school-name">Confiabilidad</p>
         <span class="school-count">3 programas</span>
       </div>
-      <div class="school-card">
+      <div class="school-card" id="escuela-integridad">
         <div class="school-icon">🔬</div>
         <p class="school-name">Integridad</p>
         <span class="school-count">2 programas</span>
       </div>
-      <div class="school-card">
+      <div class="school-card" id="escuela-energia">
         <div class="school-icon">⚡</div>
         <p class="school-name">Energía y Minería</p>
         <span class="school-count">2 programas</span>
       </div>
-      <div class="school-card">
+      <div class="school-card" id="escuela-aeronautica">
         <div class="school-icon">✈️</div>
         <p class="school-name">Aeronáutica</p>
         <span class="school-count">8 programas</span>
@@ -674,28 +689,36 @@
       <div>
         <form id="waitlistForm">
           <div class="form-grid">
-            <div class="field full">
+            <div class="field">
               <label for="wName">Nombre</label>
               <input id="wName" name="name" type="text" placeholder="Tu nombre" required>
             </div>
-            <div class="field full">
-              <label for="wContact">Correo o WhatsApp</label>
-              <input id="wContact" name="contact" type="text" placeholder="correo@ejemplo.com o 999 999 999" required>
+            <div class="field">
+              <label for="wLastName">Apellido</label>
+              <input id="wLastName" name="lastName" type="text" placeholder="Tu apellido" required>
+            </div>
+            <div class="field">
+              <label for="wEmail">Correo electrónico</label>
+              <input id="wEmail" name="email" type="email" placeholder="correo@ejemplo.com" required>
+            </div>
+            <div class="field">
+              <label for="wPhone">WhatsApp / Celular</label>
+              <input id="wPhone" name="phone" type="tel" placeholder="999 999 999" required>
+            </div>
+            <div class="field">
+              <label for="wSchool">Escuela de interés</label>
+              <select id="wSchool" name="school">
+                <option value="mantenimiento">⚙️ Mantenimiento</option>
+                <option value="confiabilidad">📊 Confiabilidad</option>
+                <option value="integridad">🔬 Integridad</option>
+                <option value="energia_mineria">⚡ Energía y Minería</option>
+                <option value="aeronautica">✈️ Aeronáutica</option>
+                <option value="no_se">Aún no sé, ayúdenme a elegir</option>
+              </select>
             </div>
             <div class="field">
               <label for="wCompany">Empresa (opcional)</label>
               <input id="wCompany" name="company" type="text" placeholder="Donde trabajas hoy">
-            </div>
-            <div class="field">
-              <label for="wProgram">Programa de interés</label>
-              <select id="wProgram" name="program">
-                <option value="inspeccion">Inspección de gas</option>
-                <option value="mantenimiento">Mantenimiento mecánico</option>
-                <option value="confiabilidad">Confiabilidad (RCM)</option>
-                <option value="seguridad">Seguridad industrial</option>
-                <option value="soldadura">Soldadura industrial</option>
-                <option value="instrumentacion">Instrumentación y control</option>
-              </select>
             </div>
           </div>
           <button type="submit" class="btn btn-primary btn-block" id="submitBtn" style="margin-top:20px;">Unirme</button>
@@ -752,12 +775,14 @@
   form.addEventListener('submit', async function(e){
     e.preventDefault();
     var name = document.getElementById('wName').value.trim();
-    var contact = document.getElementById('wContact').value.trim();
+    var lastName = document.getElementById('wLastName').value.trim();
+    var email = document.getElementById('wEmail').value.trim();
+    var phone = document.getElementById('wPhone').value.trim();
+    var school = document.getElementById('wSchool').value;
     var company = document.getElementById('wCompany').value.trim();
-    var program = document.getElementById('wProgram').value;
 
-    if (!name || !contact) {
-      msg.textContent = 'Completa tu nombre y tu correo o WhatsApp.';
+    if (!name || !lastName || !email || !phone) {
+      msg.textContent = 'Completa nombre, apellido, correo y celular.';
       msg.className = 'form-msg err';
       return;
     }
@@ -769,7 +794,7 @@
     try{
       var next = await bumpCount();
       var entryKey = 'academia_entry_' + Date.now();
-      await window.storage.set(entryKey, JSON.stringify({name:name, contact:contact, company:company, program:program, ts:Date.now()}), false);
+      await window.storage.set(entryKey, JSON.stringify({name:name, lastName:lastName, email:email, phone:phone, school:school, company:company, ts:Date.now()}), false);
       renderCount(next);
       msg.textContent = '¡Listo, ' + name + '! Quedaste registrado.';
       msg.className = 'form-msg ok';
