@@ -162,6 +162,19 @@
   .back-to-selector{display:block;text-align:center;font-size:12.5px;color:var(--muted);text-decoration:none;margin-bottom:18px;}
   .back-to-selector:hover{color:var(--text);}
 
+  .pending-widget{background:var(--ink-2);border:1px solid var(--line-strong);border-radius:8px;padding:22px;margin-bottom:40px;}
+  .pending-group{margin-bottom:16px;}
+  .pending-group:last-child{margin-bottom:0;}
+  .pending-group-title{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11.5px;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;}
+  .pending-dot{width:7px;height:7px;border-radius:50%;}
+  .pending-dot.vencida{background:#FF9E8A;}
+  .pending-dot.hoy{background:#F2C94C;}
+  .pending-dot.pronto{background:var(--teal);}
+  .pending-item{padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;display:flex;justify-content:space-between;gap:10px;}
+  .pending-item:last-child{border-bottom:none;}
+  .pending-item span{color:var(--muted);font-family:var(--font-mono);font-size:11px;white-space:nowrap;}
+  .pending-empty{color:var(--muted);font-size:12.5px;padding:4px 0;}
+
   /* ===== Campus layout ===== */
   .campus{display:flex;min-height:calc(100vh - 66px);}
   .sidebar{width:220px;flex-shrink:0;background:var(--ink-2);border-right:1px solid var(--line);padding:24px 16px;display:flex;flex-direction:column;position:sticky;top:66px;height:calc(100vh - 66px);}
@@ -292,6 +305,11 @@
       <p class="greeting-sub">Bienvenido a tu panel — sigue aprendiendo desde donde te quedaste.</p>
 
       <div class="stats-row" id="statsRow"></div>
+
+      <div class="pending-widget">
+        <div class="section-title" style="margin-bottom:18px;">Tareas pendientes</div>
+        <div id="pendingWidgetBody"></div>
+      </div>
 
       <div id="rutaBox"></div>
     </div>
@@ -1177,6 +1195,51 @@
     btn.textContent = 'Publicar caso';
   });
 
+  function pendingGroupHTML(dotClass, label, items){
+    const body = items.length
+      ? items.map(i => `<div class="pending-item"><span style="color:var(--text);">${i.titulo}${i.programaTitulo ? ' — ' + i.programaTitulo : ''}</span><span>${i.meta}</span></div>`).join('')
+      : `<p class="pending-empty">No hay elementos ${label.toLowerCase()} en este rango.</p>`;
+    return `<div class="pending-group"><div class="pending-group-title"><span class="pending-dot ${dotClass}"></span>${label}</div>${body}</div>`;
+  }
+
+  async function loadPendingWidget(userId, isInstructor){
+    const body = document.getElementById('pendingWidgetBody');
+    const now = new Date();
+    const hoyStr = now.toDateString();
+    const enSieteDias = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    let tareas = [];
+    if (!isInstructor){
+      const { data: inscripciones } = await supabase.from('inscripciones').select('programa_id').eq('usuario_id', userId);
+      const programaIds = (inscripciones || []).map(i => i.programa_id);
+      if (programaIds.length){
+        const { data } = await supabase.from('tareas').select('*, programas(titulo)').in('programa_id', programaIds);
+        const { data: entregas } = await supabase.from('entregas_tareas').select('tarea_id').eq('usuario_id', userId);
+        const entregadasSet = new Set((entregas || []).map(e => e.tarea_id));
+        tareas = (data || []).filter(t => !entregadasSet.has(t.id));
+      }
+    } else {
+      const { data } = await supabase.from('tareas').select('*, programas(titulo)').eq('creado_por', userId);
+      tareas = data || [];
+    }
+
+    const vencida = [], hoy = [], pronto = [];
+    tareas.forEach(t => {
+      const cierre = new Date(t.fecha_cierre);
+      const programaTitulo = (t.programas && t.programas.titulo) || '';
+      const meta = cierre.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
+      const item = { titulo: t.titulo, programaTitulo, meta };
+      if (cierre < now && cierre.toDateString() !== hoyStr) vencida.push(item);
+      else if (cierre.toDateString() === hoyStr) hoy.push(item);
+      else if (cierre <= enSieteDias) pronto.push(item);
+    });
+
+    body.innerHTML =
+      pendingGroupHTML('vencida', 'Vencida', vencida) +
+      pendingGroupHTML('hoy', 'Vence hoy', hoy) +
+      pendingGroupHTML('pronto', 'Vence pronto', pronto);
+  }
+
   async function loadCalificacionesOverview(userId, isInstructor){
     const box = document.getElementById('calificacionesBox');
 
@@ -1252,6 +1315,7 @@
     document.getElementById('greetingText').textContent = 'Hola, ' + currentUserName;
 
     document.getElementById('instructorPanel').classList.toggle('hidden', !isInstructor);
+    await loadPendingWidget(user.id, isInstructor);
     await loadCalificacionesOverview(user.id, isInstructor);
     await loadPerfil(user, currentUserName, perfil && perfil.rol);
 
