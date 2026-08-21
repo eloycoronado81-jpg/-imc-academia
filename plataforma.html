@@ -325,7 +325,24 @@
 
       <div id="courseStudentsBox" class="hidden">
         <div class="section-title">Estudiantes inscritos</div>
-        <div class="prog-list" id="courseStudentsList"></div>
+        <div class="prog-list" id="courseStudentsList" style="margin-bottom:32px;"></div>
+      </div>
+
+      <div id="pizarraFormBox" class="course-form hidden">
+        <div class="section-title" style="margin:0;">Publicar en la pizarra</div>
+        <textarea id="anuncioTexto" placeholder="Escribe un anuncio para todos los inscritos en este curso..." style="width:100%;min-height:70px;padding:10px 12px;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--ink);color:var(--text);font-family:inherit;font-size:13.5px;margin-top:10px;"></textarea>
+        <button type="button" class="btn btn-primary" id="anuncioBtn" style="margin-top:10px;">Publicar</button>
+        <span class="msg" id="anuncioMsg"></span>
+      </div>
+
+      <div class="section-title">Pizarra del curso</div>
+      <div class="prog-list" id="pizarraList" style="margin-bottom:32px;"></div>
+
+      <div class="section-title">Mis notas (privadas, solo tú las ves)</div>
+      <textarea id="misNotasTexto" placeholder="Escribe aquí tus apuntes de este curso..." style="width:100%;min-height:120px;padding:12px 14px;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--ink-2);color:var(--text);font-family:inherit;font-size:13.5px;"></textarea>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
+        <button type="button" class="btn btn-ghost" id="misNotasBtn">Guardar notas</button>
+        <span class="msg" id="misNotasMsg"></span>
       </div>
     </div>
   </div>
@@ -608,16 +625,104 @@
     document.getElementById('certModal').classList.add('hidden');
   });
 
+  function pizarraItemHTML(a, nombre){
+    const fecha = new Date(a.creado_en).toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
+    return `
+      <div class="session-item">
+        <div>
+          <p class="session-name">${a.contenido}</p>
+          <span class="session-meta">${nombre || 'Instructor'} · ${fecha}</span>
+        </div>
+      </div>`;
+  }
+
+  async function loadPizarra(programaId){
+    const { data: anuncios } = await supabase
+      .from('anuncios_curso')
+      .select('*')
+      .eq('programa_id', programaId)
+      .order('creado_en', { ascending: false });
+
+    const listEl = document.getElementById('pizarraList');
+    if (!anuncios || anuncios.length === 0){
+      listEl.innerHTML = '<p class="empty-note">Sin anuncios todavía en este curso.</p>';
+      return;
+    }
+    listEl.innerHTML = anuncios.map(a => pizarraItemHTML(a, currentUserName)).join('');
+  }
+
+  async function loadMisNotas(programaId, userId){
+    const { data: nota } = await supabase
+      .from('notas_curso')
+      .select('contenido')
+      .eq('programa_id', programaId)
+      .eq('usuario_id', userId)
+      .maybeSingle();
+    document.getElementById('misNotasTexto').value = (nota && nota.contenido) || '';
+  }
+
   async function openCourseModal(programaId, titulo, isInstructor, userId){
     currentCourseId = programaId;
     document.getElementById('courseModalTitle').textContent = titulo;
     document.getElementById('courseFormBox').classList.toggle('hidden', !isInstructor);
     document.getElementById('courseStudentsBox').classList.toggle('hidden', !isInstructor);
+    document.getElementById('pizarraFormBox').classList.toggle('hidden', !isInstructor);
     document.getElementById('courseModal').classList.remove('hidden');
     await loadCourseSesiones(programaId);
+    await loadPizarra(programaId);
+    await loadMisNotas(programaId, userId);
     if (isInstructor){
       await loadCourseStudents(programaId);
     }
+
+    document.getElementById('anuncioBtn').onclick = async () => {
+      const btn = document.getElementById('anuncioBtn');
+      const msg = document.getElementById('anuncioMsg');
+      const texto = document.getElementById('anuncioTexto').value.trim();
+      if (!texto) return;
+      btn.disabled = true;
+      btn.textContent = 'Publicando…';
+      const { error } = await supabase.from('anuncios_curso').insert({
+        programa_id: currentCourseId,
+        autor_id: userId,
+        contenido: texto
+      });
+      if (!error){
+        msg.textContent = 'Publicado.';
+        msg.className = 'msg ok';
+        document.getElementById('anuncioTexto').value = '';
+        await loadPizarra(currentCourseId);
+      } else {
+        msg.textContent = 'No se pudo publicar.';
+        msg.className = 'msg err';
+      }
+      btn.disabled = false;
+      btn.textContent = 'Publicar';
+    };
+
+    document.getElementById('misNotasBtn').onclick = async () => {
+      const btn = document.getElementById('misNotasBtn');
+      const msg = document.getElementById('misNotasMsg');
+      const contenido = document.getElementById('misNotasTexto').value;
+      btn.disabled = true;
+      btn.textContent = 'Guardando…';
+      const { error } = await supabase.from('notas_curso').upsert({
+        usuario_id: userId,
+        programa_id: currentCourseId,
+        contenido: contenido,
+        actualizado_en: new Date().toISOString()
+      }, { onConflict: 'usuario_id,programa_id' });
+      if (!error){
+        msg.textContent = 'Notas guardadas.';
+        msg.className = 'msg ok';
+      } else {
+        msg.textContent = 'No se pudo guardar: ' + error.message;
+        msg.className = 'msg err';
+      }
+      btn.disabled = false;
+      btn.textContent = 'Guardar notas';
+      setTimeout(() => { msg.textContent = ''; }, 2500);
+    };
 
     const form = document.getElementById('courseSessionForm');
     form.onsubmit = async (e) => {
