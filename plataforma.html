@@ -290,6 +290,7 @@
       <a href="#mis-programas">Mis programas</a>
       <a href="#catalogo">Catálogo</a>
       <a href="#casos">Casos industriales</a>
+      <a href="#biblioteca">Biblioteca</a>
       <a href="#calificaciones">Calificaciones</a>
       <a href="#mi-perfil">Mi Perfil</a>
     </nav>
@@ -346,6 +347,21 @@
           <span class="msg" id="casoMsg"></span>
         </form>
       </div>
+    </div>
+
+    <div id="biblioteca">
+      <div class="section-title">Biblioteca</div>
+      <div id="bibliotecaFormBox" class="course-form hidden">
+        <div class="section-title" style="margin:0;">Agregar recurso</div>
+        <p style="color:var(--muted);font-size:12.5px;margin:8px 0 12px;">Importante: primero sube el archivo (PDF, pptx) a tu repositorio de GitHub junto a index.html — aquí solo indicas el nombre del archivo o un link externo, no lo subes directamente.</p>
+        <div class="course-form-grid">
+          <input id="bibliotecaTitulo" type="text" placeholder="Título del recurso" required>
+          <input id="bibliotecaUrl" type="text" placeholder="nombre-archivo.pdf o link externo" required>
+        </div>
+        <button type="button" class="btn btn-primary" id="bibliotecaBtn" style="margin-top:12px;">Agregar</button>
+        <span class="msg" id="bibliotecaMsg"></span>
+      </div>
+      <div class="prog-list" id="bibliotecaList" style="margin-bottom:32px;"></div>
     </div>
 
     <div id="calificaciones">
@@ -1240,6 +1256,43 @@
       pendingGroupHTML('pronto', 'Vence pronto', pronto);
   }
 
+  async function loadBiblioteca(userId, isInstructor){
+    document.getElementById('bibliotecaFormBox').classList.toggle('hidden', !isInstructor);
+    const box = document.getElementById('bibliotecaList');
+
+    const { data: recursos } = await supabase.from('biblioteca').select('*').order('creado_en', { ascending: false });
+
+    if (!recursos || recursos.length === 0){
+      box.innerHTML = '<p class="empty-note">Todavía no hay recursos en la biblioteca.</p>';
+    } else {
+      box.innerHTML = recursos.map(r => `
+        <div class="prog-item">
+          <div><p class="prog-name">📄 ${r.titulo}</p></div>
+          <a class="btn btn-ghost" href="${r.url}" target="_blank" rel="noopener">Abrir</a>
+        </div>`).join('');
+    }
+
+    document.getElementById('bibliotecaBtn').onclick = async () => {
+      const btn = document.getElementById('bibliotecaBtn');
+      const msg = document.getElementById('bibliotecaMsg');
+      const titulo = document.getElementById('bibliotecaTitulo').value.trim();
+      const url = document.getElementById('bibliotecaUrl').value.trim();
+      if (!titulo || !url){ msg.textContent = 'Completa título y archivo/link.'; msg.className = 'msg err'; return; }
+      btn.disabled = true;
+      const { error } = await supabase.from('biblioteca').insert({ titulo, url, subido_por: userId });
+      if (!error){
+        showToast('Recurso agregado.');
+        document.getElementById('bibliotecaTitulo').value = '';
+        document.getElementById('bibliotecaUrl').value = '';
+        await loadBiblioteca(userId, isInstructor);
+      } else {
+        msg.textContent = 'No se pudo agregar: ' + error.message;
+        msg.className = 'msg err';
+      }
+      btn.disabled = false;
+    };
+  }
+
   async function loadCalificacionesOverview(userId, isInstructor){
     const box = document.getElementById('calificacionesBox');
 
@@ -1316,6 +1369,7 @@
 
     document.getElementById('instructorPanel').classList.toggle('hidden', !isInstructor);
     await loadPendingWidget(user.id, isInstructor);
+    await loadBiblioteca(user.id, isInstructor);
     await loadCalificacionesOverview(user.id, isInstructor);
     await loadPerfil(user, currentUserName, perfil && perfil.rol);
 

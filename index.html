@@ -128,6 +128,15 @@
   .route-steps li:first-child{border-top:none;}
   .route-steps li::before{content:'→';position:absolute;left:0;color:var(--teal);}
   .route-badge{display:inline-block;margin-top:14px;font-family:var(--font-mono);font-size:10.5px;color:var(--ink);background:var(--teal);padding:4px 10px;border-radius:20px;}
+
+  .idiomas-band{background:linear-gradient(135deg, var(--ink-3), var(--ink-2));border:1px solid var(--line-strong);border-radius:10px;padding:44px;display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;}
+  @media(max-width:760px){.idiomas-band{grid-template-columns:1fr;padding:30px;}}
+  .idiomas-eyebrow{font-family:var(--font-mono);font-size:12px;color:var(--teal);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;}
+  .idiomas-title{font-family:var(--font-display);font-weight:700;font-size:28px;margin:0 0 14px;}
+  .idiomas-desc{color:var(--text-dim);font-size:14.5px;margin:0 0 22px;}
+  .idiomas-features{list-style:none;margin:0;padding:0;}
+  .idiomas-features li{font-size:13.5px;color:var(--text);padding:8px 0;border-top:1px solid var(--line);}
+  .idiomas-features li:first-child{border-top:none;}
   .program-card{background:var(--ink-2);padding:26px 24px;transition:background .15s;}
   .program-card:hover{background:var(--ink-3);}
   .program-num{font-family:var(--font-mono);font-size:12px;color:var(--teal);margin-bottom:14px;}
@@ -609,6 +618,25 @@
           </ul>
         </details>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="idiomas">
+  <div class="wrap">
+    <div class="idiomas-band">
+      <div>
+        <div class="idiomas-eyebrow">IMC Idiomas</div>
+        <h2 class="idiomas-title">Inglés técnico para el sector aeronáutico</h2>
+        <p class="idiomas-desc">No es un curso de inglés general — es el vocabulario y la documentación que un técnico o ingeniero aeronáutico usa todos los días: manuales AMM, IPC, fraseología de mantenimiento y reportes técnicos.</p>
+        <a href="#unirme" class="btn btn-primary">Unirme a la lista de espera</a>
+      </div>
+      <ul class="idiomas-features">
+        <li>📘 Terminología técnica de mantenimiento aeronáutico</li>
+        <li>🗣️ Fraseología y documentación técnica en inglés</li>
+        <li>📄 Comprensión de manuales técnicos (AMM, IPC) en inglés</li>
+        <li>🎓 Certificación IMC al finalizar</li>
+      </ul>
     </div>
   </div>
 </section>
