@@ -8,7 +8,27 @@
 <meta property="og:title" content="IMC Academia — Formación técnica para gas, minería y aviación">
 <meta property="og:description" content="Formación industrial creada desde la experiencia real. 19 programas 100% online, con certificación al finalizar.">
 <meta property="og:type" content="website">
+<meta property="og:image" content="assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="IMC Academia — Formación técnica para gas, minería y aviación">
+<meta name="twitter:description" content="Formación industrial creada desde la experiencia real. 19 programas 100% online, con certificación al finalizar.">
+<meta name="twitter:image" content="assets/og-image.png">
+<meta name="theme-color" content="#0E2226">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%230E2226'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%234FD8C4' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  "name": "IMC Academia",
+  "description": "Plataforma peruana de cursos y certificaciones técnicas en mantenimiento, confiabilidad, integridad, energía, minería y aviación.",
+  "address": { "@type": "PostalAddress", "addressCountry": "PE" },
+  "parentOrganization": {
+    "@type": "Organization",
+    "name": "Ingeniería, Mantenimiento y Confiabilidad E.I.R.L."
+  }
+}
+</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
@@ -62,7 +82,7 @@
   .btn:active{transform:scale(0.98);}
   .btn:focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
   .btn-primary{background:var(--teal);color:#04211D;}
-  .btn-primary:hover{background:var(--teal-dark);}
+  .btn-primary:hover{background:var(--teal-dark);box-shadow:0 8px 20px rgba(79,216,196,0.22);}
   .btn-ghost, .btn-on-dark{background:transparent;color:var(--text);border-color:var(--line-strong);}
   .btn-ghost:hover, .btn-on-dark:hover{border-color:var(--text);}
   .btn-block{width:100%;}
@@ -91,6 +111,8 @@
 
   /* status panel (was titleblock) */
   .titleblock{position:relative;border:1px solid var(--line-strong);background:rgba(220,238,236,0.03);font-family:var(--font-mono);font-size:11px;}
+  .titleblock::before{content:'';position:absolute;inset:-7px;border:1px solid var(--teal-dim);border-radius:6px;pointer-events:none;}
+  .cert-seal{position:absolute;top:-24px;right:-18px;width:66px;height:66px;border-radius:50%;background:var(--ink);border:2px solid var(--teal);display:flex;align-items:center;justify-content:center;transform:rotate(-11deg);font-family:var(--font-mono);font-weight:600;font-size:9px;line-height:1.2;text-align:center;color:var(--teal);letter-spacing:0.02em;padding:6px;box-shadow:0 6px 18px rgba(0,0,0,0.4);z-index:1;}
   .tb-row{display:flex;border-bottom:1px solid var(--line);}
   .tb-row:last-child{border-bottom:none;}
   .tb-cell{padding:10px 14px;flex:1;border-right:1px solid var(--line);}
@@ -117,15 +139,16 @@
   .programs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);}
 
   .schools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:56px;}
-  .school-card{background:var(--ink-2);border:1px solid var(--line);border-radius:6px;padding:22px;cursor:pointer;transition:border-color .15s, background .15s;}
-  .school-card:hover{border-color:var(--teal);background:var(--ink-3);}
+  .school-card{background:var(--ink-2);border:1px solid var(--line);border-radius:6px;padding:22px;cursor:pointer;transition:border-color .15s, background .15s, transform .15s, box-shadow .15s;}
+  .school-card:hover{border-color:var(--teal);background:var(--ink-3);transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,0.25);}
   .school-card.active{border-color:var(--teal);background:var(--ink-3);}
   .school-icon{font-size:26px;margin-bottom:12px;}
   .school-name{font-weight:600;font-size:15px;color:var(--text);margin:0 0 4px;}
   .school-count{font-family:var(--font-mono);font-size:11px;color:var(--text-dimmer);}
 
   .routes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:56px;}
-  .route-card{background:var(--ink-2);padding:26px 24px;}
+  .route-card{background:var(--ink-2);padding:26px 24px;border-top:2px solid transparent;transition:border-color .15s;}
+  .route-card:hover{border-top-color:var(--teal);}
   .route-tag{font-family:var(--font-mono);font-size:10.5px;color:var(--teal);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px;}
   .route-title{font-family:var(--font-display);font-weight:600;font-size:18px;color:var(--text);margin:0 0 14px;}
   .route-steps{list-style:none;margin:0;padding:0;}
@@ -142,8 +165,8 @@
   .idiomas-features{list-style:none;margin:0;padding:0;}
   .idiomas-features li{font-size:13.5px;color:var(--text);padding:8px 0;border-top:1px solid var(--line);}
   .idiomas-features li:first-child{border-top:none;}
-  .program-card{background:var(--ink-2);padding:26px 24px;transition:background .15s;}
-  .program-card:hover{background:var(--ink-3);}
+  .program-card{background:var(--ink-2);padding:26px 24px;border-top:2px solid transparent;transition:background .15s, border-color .15s;}
+  .program-card:hover{background:var(--ink-3);border-top-color:var(--teal);}
   .program-num{font-family:var(--font-mono);font-size:12px;color:var(--teal);margin-bottom:14px;}
   .program-title{font-weight:600;font-size:16.5px;margin:0 0 8px;color:var(--text);}
   .program-desc{color:var(--text-dim);font-size:13.5px;margin:0 0 12px;line-height:1.6;}
@@ -158,7 +181,8 @@
   /* identity: mision / vision / valores */
   .identity-grid{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:1px;}
   @media(min-width:760px){.identity-grid{grid-template-columns:repeat(2,1fr);}}
-  .identity-card{background:var(--ink-2);padding:30px 28px;}
+  .identity-card{background:var(--ink-2);padding:30px 28px;border-top:2px solid transparent;transition:border-color .15s;}
+  .identity-card:hover{border-top-color:var(--teal);}
   .identity-tag{font-family:var(--font-mono);font-size:11px;color:var(--teal);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;}
   .identity-title{font-family:var(--font-display);font-weight:600;font-size:20px;color:var(--text);margin:0 0 12px;}
   .identity-text{color:var(--text-dim);font-size:14.5px;margin:0;line-height:1.7;}
@@ -288,6 +312,7 @@
     </div>
 
     <div class="titleblock">
+      <div class="cert-seal">VERIFICADO<br>EN CAMPO</div>
       <div class="tb-head">Ficha del programa</div>
       <div class="tb-row">
         <div class="tb-cell"><span class="tb-label">Sectores</span><span class="tb-value">Industrial y aviación</span></div>
