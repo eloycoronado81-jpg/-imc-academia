@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hoja de ruta pública — 3 paletas más amigables</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=Baloo+2:wght@600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Manrope',sans-serif;}
+  .proposal{padding:60px 8vw 68px;}
+  .label{font-size:12px;letter-spacing:0.06em;text-transform:uppercase;font-weight:700;margin-bottom:22px;opacity:0.75;}
+  .eyebrow{font-size:13px;font-weight:600;letter-spacing:0.03em;margin-bottom:12px;}
+  .headline{font-weight:700;font-size:clamp(28px,4vw,40px);line-height:1.15;margin-bottom:14px;max-width:640px;}
+  .sub{font-size:16px;max-width:520px;margin-bottom:26px;line-height:1.6;}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:14px 26px;font-size:14.5px;font-weight:700;border-radius:100px;text-decoration:none;cursor:pointer;border:none;}
+  .board{display:grid;grid-template-columns:1fr;gap:16px;margin-top:34px;}
+  @media(min-width:800px){.board{grid-template-columns:repeat(3,1fr);}}
+  .board-col{border-radius:18px;padding:20px;}
+  .board-head{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+  .board-card{border-radius:14px;padding:16px 18px;margin-bottom:12px;font-size:14px;font-weight:600;}
+  .board-card .votes{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;font-weight:500;opacity:0.75;}
+
+  /* ===== A: PAPEL CALIDO ===== */
+  .pA{background:#FBF6EE;color:#2B2115;}
+  .pA .label{color:#C6693A;}
+  .pA .eyebrow{color:#C6693A;}
+  .pA .headline span{color:#C6693A;}
+  .pA .btn{background:#C6693A;color:#FBF6EE;}
+  .pA .sub{color:#6B5D48;}
+  .pA .board-col{background:#F2E9D8;}
+  .pA .board-col.c1 .board-head{color:#C6693A;}
+  .pA .board-col.c2 .board-head{color:#3E8E7E;}
+  .pA .board-col.c3 .board-head{color:#8A7E68;}
+  .pA .board-card{background:#FFFDF8;box-shadow:0 2px 0 rgba(43,33,21,0.06);}
+  .pA .board-card .votes{color:#8A7E68;}
+  .pA .board-card .votes b{color:#C6693A;}
+
+  /* ===== B: AQUA SUAVE ===== */
+  .pB{background:linear-gradient(180deg,#EAF9F5,#F4FBF9);color:#0F3D36;}
+  .pB .label{color:#1FA98A;}
+  .pB .eyebrow{color:#1FA98A;}
+  .pB .headline span{color:#1FA98A;}
+  .pB .btn{background:#1FA98A;color:#fff;}
+  .pB .sub{color:#4C7A72;}
+  .pB .board-col{background:#FFFFFF;box-shadow:0 4px 18px rgba(15,61,54,0.06);}
+  .pB .board-col.c1 .board-head{color:#F2A93B;}
+  .pB .board-col.c2 .board-head{color:#1FA98A;}
+  .pB .board-col.c3 .board-head{color:#7FA79E;}
+  .pB .board-card{background:#F4FBF9;}
+  .pB .board-card .votes{color:#4C7A72;}
+  .pB .board-card .votes b{color:#1FA98A;}
+
+  /* ===== C: NOCHE CALIDA (dark pero amable) ===== */
+  .pC{background:#221A2E;color:#F3ECFA;}
+  .pC .label{color:#F2A93B;}
+  .pC .eyebrow{color:#F2A93B;}
+  .pC .headline span{color:#F2A93B;}
+  .pC .btn{background:#F2A93B;color:#2B1A02;}
+  .pC .sub{color:#C6B9D6;}
+  .pC .board-col{background:#2C2340;}
+  .pC .board-col.c1 .board-head{color:#F2A93B;}
+  .pC .board-col.c2 .board-head{color:#7FD8C4;}
+  .pC .board-col.c3 .board-head{color:#8E82A3;}
+  .pC .board-card{background:#382A54;}
+  .pC .board-card .votes{color:#B3A6C7;}
+  .pC .board-card .votes b{color:#7FD8C4;}
+
+  .fontA .headline, .fontA .btn{font-family:'Baloo 2',sans-serif;}
+  .fontB .headline, .fontB .btn{font-family:'Poppins',sans-serif;}
+  .fontC .headline, .fontC .btn{font-family:'Poppins',sans-serif;}
+</style>
+</head>
+<body>
+
+<section class="proposal pA fontA">
+  <div class="label">Paleta A — Papel cálido</div>
+  <span class="eyebrow">Construyendo en público</span>
+  <h1 class="headline">Vota qué construimos <span>después</span></h1>
+  <p class="sub">Cada programa nuevo nace de lo que la comunidad técnica pide. Sigue el tablero, vota las ideas que te sirven y entérate primero cuando algo se lanza.</p>
+  <a class="btn" href="#">Sumar mi voto y seguir el tablero</a>
+  <div class="board">
+    <div class="board-col c1">
+      <div class="board-head">💡 Explorando</div>
+      <div class="board-card">Certificación en gestión de paradas de planta<div class="votes">👍 <b>84</b> votos</div></div>
+      <div class="board-card">Curso corto de drones para inspección industrial<div class="votes">👍 <b>51</b> votos</div></div>
+    </div>
+    <div class="board-col c2">
+      <div class="board-head">🔨 Construyendo</div>
+      <div class="board-card">Ruta de Especialista en Energía Renovable<div class="votes">👍 <b>132</b> votos</div></div>
+    </div>
+    <div class="board-col c3">
+      <div class="board-head">✅ Lanzado</div>
+      <div class="board-card">Inglés técnico de aviación<div class="votes">disponible ahora</div></div>
+      <div class="board-card">TPM — Mantenimiento Productivo Total<div class="votes">disponible ahora</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="proposal pB fontB">
+  <div class="label">Paleta B — Aqua suave</div>
+  <span class="eyebrow">Construyendo en público</span>
+  <h1 class="headline">Vota qué construimos <span>después</span></h1>
+  <p class="sub">Cada programa nuevo nace de lo que la comunidad técnica pide. Sigue el tablero, vota las ideas que te sirven y entérate primero cuando algo se lanza.</p>
+  <a class="btn" href="#">Sumar mi voto y seguir el tablero</a>
+  <div class="board">
+    <div class="board-col c1">
+      <div class="board-head">💡 Explorando</div>
+      <div class="board-card">Certificación en gestión de paradas de planta<div class="votes">👍 <b>84</b> votos</div></div>
+      <div class="board-card">Curso corto de drones para inspección industrial<div class="votes">👍 <b>51</b> votos</div></div>
+    </div>
+    <div class="board-col c2">
+      <div class="board-head">🔨 Construyendo</div>
+      <div class="board-card">Ruta de Especialista en Energía Renovable<div class="votes">👍 <b>132</b> votos</div></div>
+    </div>
+    <div class="board-col c3">
+      <div class="board-head">✅ Lanzado</div>
+      <div class="board-card">Inglés técnico de aviación<div class="votes">disponible ahora</div></div>
+      <div class="board-card">TPM — Mantenimiento Productivo Total<div class="votes">disponible ahora</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="proposal pC fontC">
+  <div class="label">Paleta C — Noche cálida (oscuro pero amable)</div>
+  <span class="eyebrow">Construyendo en público</span>
+  <h1 class="headline">Vota qué construimos <span>después</span></h1>
+  <p class="sub">Cada programa nuevo nace de lo que la comunidad técnica pide. Sigue el tablero, vota las ideas que te sirven y entérate primero cuando algo se lanza.</p>
+  <a class="btn" href="#">Sumar mi voto y seguir el tablero</a>
+  <div class="board">
+    <div class="board-col c1">
+      <div class="board-head">💡 Explorando</div>
+      <div class="board-card">Certificación en gestión de paradas de planta<div class="votes">👍 <b>84</b> votos</div></div>
+      <div class="board-card">Curso corto de drones para inspección industrial<div class="votes">👍 <b>51</b> votos</div></div>
+    </div>
+    <div class="board-col c2">
+      <div class="board-head">🔨 Construyendo</div>
+      <div class="board-card">Ruta de Especialista en Energía Renovable<div class="votes">👍 <b>132</b> votos</div></div>
+    </div>
+    <div class="board-col c3">
+      <div class="board-head">✅ Lanzado</div>
+      <div class="board-card">Inglés técnico de aviación<div class="votes">disponible ahora</div></div>
+      <div class="board-card">TPM — Mantenimiento Productivo Total<div class="votes">disponible ahora</div></div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
