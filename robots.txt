@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Reemplaza REEMPLAZA-CON-TU-DOMINIO en sitemap.xml por el dominio real una vez publicado el sitio.
+Sitemap: https://REEMPLAZA-CON-TU-DOMINIO/sitemap.xml

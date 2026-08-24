@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMC Academia — 4 propuestas: página de visión y comunidad</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --ink:#0E2226; --ink-2:#153230; --ink-3:#1C3B38;
+    --teal:#4FD8C4; --teal-dark:#2FB39E; --teal-dim:#2F5A57;
+    --text:#DCEEEC; --text-dim:#9FC1BD; --text-dimmer:#6B8E8A;
+    --line: rgba(220,238,236,0.12); --line-strong: rgba(220,238,236,0.24);
+    --gold:#E3B34D; --amber:#F2A93B; --rose:#FF9E8A;
+    --font-display:'Space Grotesk', sans-serif; --font-body:'IBM Plex Sans', sans-serif; --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--ink);color:var(--text);font-family:var(--font-body);line-height:1.55;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+
+  .proposal{padding:64px 8vw 72px;position:relative;border-bottom:1px solid var(--line);}
+  .label{font-family:var(--font-mono);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--teal);margin-bottom:28px;display:flex;align-items:center;gap:8px;}
+  .label::before{content:'';width:16px;height:1.5px;background:var(--teal);}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;font-size:14px;font-weight:600;border-radius:3px;text-decoration:none;cursor:pointer;border:1.5px solid transparent;}
+  .btn-primary{background:var(--teal);color:#04211D;}
+  .btn-ghost{background:transparent;color:var(--text);border-color:var(--line-strong);}
+  .eyebrow{font-family:var(--font-mono);font-size:12px;color:var(--teal);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px;}
+  .headline{font-family:var(--font-display);font-weight:700;font-size:clamp(28px,4vw,42px);line-height:1.12;margin-bottom:16px;max-width:680px;}
+  .headline span{color:var(--teal);}
+  .sub{color:var(--text-dim);font-size:16px;max-width:540px;margin-bottom:30px;}
+
+  /* ===== 1: CONSEJO FUNDADOR ===== */
+  .p1-inner{display:grid;grid-template-columns:1fr;gap:44px;}
+  @media(min-width:900px){.p1-inner{grid-template-columns:1.1fr 0.9fr;align-items:center;}}
+  .founder-card{background:var(--ink-2);border:1px solid var(--line-strong);border-radius:10px;padding:32px;position:relative;}
+  .founder-card::before{content:'';position:absolute;inset:6px;border:1px solid var(--teal-dim);border-radius:6px;pointer-events:none;}
+  .fc-num{font-family:var(--font-display);font-weight:700;font-size:44px;color:var(--teal);}
+  .fc-label{font-family:var(--font-mono);font-size:11px;color:var(--text-dimmer);text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;}
+  .fc-list{list-style:none;margin-top:24px;}
+  .fc-list li{font-size:13.5px;color:var(--text-dim);padding:10px 0;border-top:1px solid var(--line);}
+  .fc-list li:first-child{border-top:none;}
+  .fc-list b{color:var(--text);}
+
+  /* ===== 2: HOJA DE RUTA PUBLICA (kanban) ===== */
+  .board{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin-top:8px;}
+  @media(min-width:800px){.board{grid-template-columns:repeat(3,1fr);}}
+  .board-col{background:var(--ink);padding:18px;}
+  .board-head{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .board-head.explorando{color:var(--amber);}
+  .board-head.construyendo{color:var(--teal);}
+  .board-head.lanzado{color:var(--text-dimmer);}
+  .board-card{background:var(--ink-2);border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin-bottom:10px;font-size:13.5px;}
+  .board-card .votes{display:flex;align-items:center;gap:6px;margin-top:10px;font-family:var(--font-mono);font-size:11px;color:var(--text-dimmer);}
+  .board-card .votes b{color:var(--teal);}
+
+  /* ===== 3: EMBAJADORES TECNICOS ===== */
+  .tiers{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin-top:8px;}
+  @media(min-width:800px){.tiers{grid-template-columns:repeat(3,1fr);}}
+  .tier{background:var(--ink-2);padding:26px 24px;}
+  .tier-name{font-family:var(--font-display);font-weight:600;font-size:17px;margin-bottom:8px;}
+  .tier.bronce .tier-name{color:#C08552;}
+  .tier.plata .tier-name{color:#B9C3C6;}
+  .tier.oro .tier-name{color:var(--gold);}
+  .tier-desc{font-size:13px;color:var(--text-dim);line-height:1.7;}
+
+  /* ===== 4: BETA ABIERTA (feed) ===== */
+  .feed{margin-top:8px;max-width:620px;}
+  .feed-item{display:grid;grid-template-columns:90px 1fr;gap:18px;padding:18px 0;border-top:1px solid var(--line);}
+  .feed-item:first-child{border-top:none;}
+  .feed-date{font-family:var(--font-mono);font-size:11px;color:var(--text-dimmer);padding-top:2px;}
+  .feed-tag{display:inline-block;font-family:var(--font-mono);font-size:10.5px;color:var(--ink);background:var(--teal);padding:3px 9px;border-radius:20px;margin-bottom:8px;}
+  .feed-title{font-weight:600;font-size:14.5px;margin-bottom:4px;}
+  .feed-text{font-size:13.5px;color:var(--text-dim);}
+</style>
+</head>
+<body>
+
+<section class="proposal p1">
+  <div class="label">Propuesta 1 — Consejo Fundador</div>
+  <div class="p1-inner">
+    <div>
+      <span class="eyebrow">Cupos limitados · Primera generación</span>
+      <h1 class="headline">Sé parte del <span>Consejo Fundador</span> de IMC Academia</h1>
+      <p class="sub">No te invitamos solo a estudiar — te invitamos a decidir qué programas se crean primero, a probarlos antes que nadie y a dejar tu huella en cómo crece esta academia.</p>
+      <a class="btn btn-primary" href="#">Postular al Consejo Fundador</a>
+    </div>
+    <div class="founder-card">
+      <div class="fc-num">047</div>
+      <div class="fc-label">Miembros fundadores admitidos · Meta: 150</div>
+      <ul class="fc-list">
+        <li><b>Voz en el catálogo</b> — votas qué programa se construye después.</li>
+        <li><b>Acceso anticipado</b> — pruebas cada programa antes del lanzamiento público.</li>
+        <li><b>Reconocimiento permanente</b> — tu nombre queda en la página de fundadores.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="proposal p2">
+  <div class="label">Propuesta 2 — Hoja de ruta pública (votable)</div>
+  <span class="eyebrow">Construyendo en público</span>
+  <h1 class="headline">Vota qué construimos <span>después</span></h1>
+  <p class="sub">Cada programa nuevo nace de lo que la comunidad técnica pide. Sigue el tablero, vota las ideas que te sirven y entérate primero cuando algo pasa de "explorando" a "lanzado".</p>
+  <a class="btn btn-primary" href="#">Sumar mi voto y seguir el tablero</a>
+  <div class="board">
+    <div class="board-col">
+      <div class="board-head explorando">● Explorando</div>
+      <div class="board-card">Certificación en gestión de paradas de planta<div class="votes">👍 <b>84</b> votos</div></div>
+      <div class="board-card">Curso corto de drones para inspección industrial<div class="votes">👍 <b>51</b> votos</div></div>
+    </div>
+    <div class="board-col">
+      <div class="board-head construyendo">● Construyendo</div>
+      <div class="board-card">Ruta de Especialista en Energía Renovable<div class="votes">👍 <b>132</b> votos</div></div>
+    </div>
+    <div class="board-col">
+      <div class="board-head lanzado">● Lanzado</div>
+      <div class="board-card">Inglés técnico de aviación<div class="votes">✓ disponible ahora</div></div>
+      <div class="board-card">TPM — Mantenimiento Productivo Total<div class="votes">✓ disponible ahora</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="proposal p3">
+  <div class="label">Propuesta 3 — Embajadores técnicos</div>
+  <span class="eyebrow">Para quienes ya son parte de IMC</span>
+  <h1 class="headline">Ayúdanos a llegar a más técnicos <span>del sector</span></h1>
+  <p class="sub">Si ya llevas un programa con nosotros, conviértete en embajador: comparte tu experiencia, ayuda a otros técnicos a elegir su ruta, y sube de nivel según tu aporte a la comunidad.</p>
+  <a class="btn btn-primary" href="#">Inscribirme como embajador</a>
+  <div class="tiers">
+    <div class="tier bronce">
+      <div class="tier-name">🥉 Bronce</div>
+      <p class="tier-desc">Comparte tu certificado y tu experiencia en tu red. Acceso al grupo privado de embajadores.</p>
+    </div>
+    <div class="tier plata">
+      <div class="tier-name">🥈 Plata</div>
+      <p class="tier-desc">Recomienda IMC a colegas de tu planta o empresa. Sesiones mensuales de feedback directo con el fundador.</p>
+    </div>
+    <div class="tier oro">
+      <div class="tier-name">🥇 Oro</div>
+      <p class="tier-desc">Co-diseña contenido con nosotros a partir de casos reales de tu propio trabajo. Reconocimiento público como instructor invitado.</p>
+    </div>
+  </div>
+</section>
+
+<section class="proposal p4" style="border-bottom:none;">
+  <div class="label">Propuesta 4 — Beta abierta</div>
+  <span class="eyebrow">Prueba antes que nadie</span>
+  <h1 class="headline">Entra a la <span>beta abierta</span> y dános tu feedback</h1>
+  <p class="sub">Cada programa nuevo pasa primero por un grupo pequeño de técnicos que lo prueban y lo corrigen con nosotros antes del lanzamiento general. Así construimos con la industria, no para la industria.</p>
+  <a class="btn btn-primary" href="#">Sumarme a la beta abierta</a>
+  <div class="feed">
+    <div class="feed-item">
+      <div class="feed-date">Ago 2026</div>
+      <div>
+        <span class="feed-tag">Beta abierta</span>
+        <div class="feed-title">Confiabilidad y costos de mantenimiento</div>
+        <div class="feed-text">18 técnicos probando el programa completo. Cierra inscripción de beta el 30 de agosto.</div>
+      </div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-date">Jul 2026</div>
+      <div>
+        <span class="feed-tag">Ajustado con feedback</span>
+        <div class="feed-title">Inspección de líneas y equipos de gas</div>
+        <div class="feed-text">Se agregó un módulo de normativa a pedido del grupo beta antes de salir al público.</div>
+      </div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-date">Jun 2026</div>
+      <div>
+        <span class="feed-tag">Lanzado</span>
+        <div class="feed-title">TPM — Mantenimiento Productivo Total</div>
+        <div class="feed-text">Graduó de beta con 92% de aprobación del grupo de prueba.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
