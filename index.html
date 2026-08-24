@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IMC Academia — Formación técnica para gas y minería</title>
+<title>IMC Academia — Formación técnica para gas, minería y aviación</title>
+<meta name="description" content="IMC Academia forma técnicos en mantenimiento, confiabilidad, integridad, energía, minería y aviación con casos reales de campo. 19 programas 100% online, con certificación al finalizar.">
+<meta property="og:title" content="IMC Academia — Formación técnica para gas, minería y aviación">
+<meta property="og:description" content="Formación industrial creada desde la experiencia real. 19 programas 100% online, con certificación al finalizar.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%230E2226'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%234FD8C4' stroke-width='3'/%3E%3C/svg%3E">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
@@ -50,8 +55,8 @@
   .nav-dropdown:hover .nav-dropdown-panel{display:flex;}
   .nav-dropdown-panel a{padding:9px 12px;border-radius:5px;font-size:13.5px;}
   .nav-dropdown-panel a:hover{background:var(--ink-3);}
-  .nav-cta{display:none;}
-  @media(min-width:760px){.nav-cta{display:inline-flex;}}
+  .nav-inner .nav-cta{display:none;}
+  @media(min-width:760px){.nav-inner .nav-cta{display:inline-flex;}}
 
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 24px;font-size:14px;font-weight:600;border-radius:var(--radius);border:1.5px solid transparent;cursor:pointer;transition:transform .12s, background .15s, border-color .15s;text-decoration:none;}
   .btn:active{transform:scale(0.98);}
@@ -150,11 +155,51 @@
   .program-details[open] summary::before{content:'– ';}
   .program-details ul{margin:10px 0 0;padding-left:18px;color:var(--text-dim);font-size:13px;line-height:1.7;}
 
+  /* identity: mision / vision / valores */
+  .identity-grid{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:1px;}
+  @media(min-width:760px){.identity-grid{grid-template-columns:repeat(2,1fr);}}
+  .identity-card{background:var(--ink-2);padding:30px 28px;}
+  .identity-tag{font-family:var(--font-mono);font-size:11px;color:var(--teal);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;}
+  .identity-title{font-family:var(--font-display);font-weight:600;font-size:20px;color:var(--text);margin:0 0 12px;}
+  .identity-text{color:var(--text-dim);font-size:14.5px;margin:0;line-height:1.7;}
+
+  .values-grid{display:grid;grid-template-columns:1fr;gap:28px;margin-top:44px;}
+  @media(min-width:640px){.values-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(min-width:980px){.values-grid{grid-template-columns:repeat(4,1fr);}}
+  .value-item{border-left:2px solid var(--teal);padding-left:16px;}
+  .value-item h4{font-family:var(--font-display);font-weight:600;font-size:15px;margin:0 0 6px;color:var(--text);}
+  .value-item p{color:var(--text-dim);font-size:13px;margin:0;line-height:1.6;}
+
+  /* roadmap teaser */
+  .roadmap-strip{border:1px solid var(--line-strong);border-radius:8px;padding:30px 30px;margin-top:48px;background:linear-gradient(135deg, var(--ink-3), var(--ink-2));display:flex;flex-direction:column;gap:22px;}
+  @media(min-width:900px){.roadmap-strip{flex-direction:row;align-items:center;justify-content:space-between;gap:32px;}}
+  .roadmap-label{font-family:var(--font-mono);font-size:11px;color:var(--teal);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;}
+  .roadmap-steps{display:flex;flex-wrap:wrap;gap:0;}
+  .roadmap-step{font-size:13px;color:var(--text-dimmer);padding-right:16px;margin-right:16px;position:relative;}
+  .roadmap-step:not(:last-child)::after{content:'→';color:var(--teal);position:absolute;right:-8px;}
+  .roadmap-step b{color:var(--text);font-weight:600;}
+  .roadmap-strip .btn{flex-shrink:0;}
+
   /* founder */
   .founder-grid{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:start;}
   @media(max-width:600px){.founder-grid{grid-template-columns:1fr;}}
   .founder-avatar{width:84px;height:84px;border-radius:50%;background:var(--teal);color:#04211D;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:26px;flex-shrink:0;}
   .founder-bio{color:var(--text-dim);font-size:15px;margin:0 0 12px;max-width:560px;}
+  .founder-badges{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;}
+  .founder-badge{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:12px;color:var(--text-dim);border:1px solid var(--line-strong);border-radius:20px;padding:7px 14px;text-decoration:none;}
+  .founder-badge:hover{border-color:var(--teal);color:var(--text);}
+  .founder-badge b{color:var(--teal);font-weight:600;}
+
+  /* faq */
+  .faq{background:var(--ink-2);}
+  .faq-list{max-width:760px;}
+  .faq-item{border-top:1px solid var(--line);padding:20px 0;}
+  .faq-item:last-child{border-bottom:1px solid var(--line);}
+  .faq-item summary{cursor:pointer;font-family:var(--font-display);font-weight:600;font-size:16.5px;color:var(--text);list-style:none;display:flex;justify-content:space-between;gap:16px;align-items:center;}
+  .faq-item summary::-webkit-details-marker{display:none;}
+  .faq-item summary::after{content:'+';font-family:var(--font-mono);color:var(--teal);font-size:20px;flex-shrink:0;}
+  .faq-item[open] summary::after{content:'–';}
+  .faq-item p{color:var(--text-dim);font-size:14px;line-height:1.7;margin:14px 0 0;max-width:640px;}
 
   /* why */
   .why{background:var(--ink-2);}
@@ -201,6 +246,7 @@
   <div class="nav-inner">
     <div class="brand"><span class="brand-mark"></span>IMC Academia</div>
     <nav class="navlinks">
+      <a href="#quienes-somos">Quiénes somos</a>
       <div class="nav-dropdown">
         <a href="#programas">Programas ▾</a>
         <div class="nav-dropdown-panel">
@@ -254,6 +300,59 @@
       <div class="tb-row">
         <div class="tb-cell" style="border-right:none;"><span class="tb-label">Fundado por</span><span class="tb-value">Ing. con trayectoria FAP y sector industrial</span></div>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="quienes-somos">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="section-tag">Quiénes somos</span>
+      <h2 class="section-title">Una academia con raíces en la industria real</h2>
+      <p class="section-sub">IMC Academia es un proyecto de <strong>Ingeniería, Mantenimiento y Confiabilidad E.I.R.L.</strong>, empresa peruana de servicios de ingeniería. No somos una universidad ni estamos licenciados por SUNEDU — somos una plataforma de cursos y certificaciones técnicas, y lo decimos con claridad porque así construimos confianza a largo plazo.</p>
+    </div>
+    <div class="identity-grid">
+      <div class="identity-card">
+        <div class="identity-tag">Misión</div>
+        <h3 class="identity-title">Formar con el estándar de la planta, no solo del aula</h3>
+        <p class="identity-text">Dar a técnicos y profesionales de gas, minería, confiabilidad industrial y aviación una formación construida sobre casos reales de campo — con la misma exigencia que se aplica en una operación real — y una certificación que respalde ese conocimiento.</p>
+      </div>
+      <div class="identity-card">
+        <div class="identity-tag">Visión</div>
+        <h3 class="identity-title">Ser la referencia técnica del Perú, con proyección de crecer</h3>
+        <p class="identity-text">Consolidarnos como la academia de referencia en formación técnica industrial y aeronáutica del país, y construir, con evidencia real de estudiantes e instructores, el camino hacia una institución de educación superior licenciada.</p>
+      </div>
+    </div>
+
+    <div class="values-grid">
+      <div class="value-item">
+        <h4>Experiencia de campo</h4>
+        <p>Todo lo que enseñamos viene de gente que ha operado, inspeccionado y mantenido equipos reales.</p>
+      </div>
+      <div class="value-item">
+        <h4>Transparencia</h4>
+        <p>Somos claros sobre qué somos hoy — una academia de certificaciones técnicas — y hacia dónde vamos.</p>
+      </div>
+      <div class="value-item">
+        <h4>Mejora continua</h4>
+        <p>Cada programa se ajusta con la retroalimentación de la propia comunidad técnica que lo cursa.</p>
+      </div>
+      <div class="value-item">
+        <h4>Cercanía</h4>
+        <p>Acompañamos a cada estudiante a elegir su ruta, no solo a comprar un curso suelto.</p>
+      </div>
+    </div>
+
+    <div class="roadmap-strip">
+      <div>
+        <div class="roadmap-label">Hacia dónde vamos</div>
+        <div class="roadmap-steps">
+          <span class="roadmap-step"><b>Hoy:</b> cursos y certificaciones</span>
+          <span class="roadmap-step"><b>Próximo:</b> más áreas de formación</span>
+          <span class="roadmap-step"><b>Aspiración:</b> institución licenciada</span>
+        </div>
+      </div>
+      <a href="vision.html" class="btn btn-ghost">Ver nuestra visión completa →</a>
     </div>
   </div>
 </section>
@@ -649,6 +748,10 @@
       <h2 class="section-title">El fundador</h2>
       <p class="founder-bio">Ingeniero Industrial (Universidad Nacional Federico Villarreal), con Licenciatura en Ciencias de la Administración Aeroespacial de la Escuela de Oficiales de la Fuerza Aérea del Perú, y maestrías en Administración (Universidad del Pacífico) y en Gerencia del Mantenimiento (Universidad Nacional del Callao). En la FAP se desempeñó como Jefe de Confiabilidad de Aviones y Helicópteros y en control de calidad de mantenimiento de aeronaves (Boeing 737, Bell 212, Mi-17, Bo-105, Bell 412). También inspector mecánico con experiencia de campo en gas y minería, y docente de Mantenimiento Centrado en Confiabilidad (RCM) y TPM. Fundador de Ingeniería, Mantenimiento y Confiabilidad E.I.R.L., empresa que respalda esta academia.</p>
       <p class="founder-bio" style="margin:0;">El contenido de cada programa parte de casos reales de planta, no solo de teoría — la misma exigencia que se aplica en el día a día en campo.</p>
+      <div class="founder-badges">
+        <span class="founder-badge">🏢 Respaldado por <b>Ingeniería, Mantenimiento y Confiabilidad E.I.R.L.</b></span>
+        <a href="verificar.html" class="founder-badge">🔎 Verifica un certificado emitido <b>→</b></a>
+      </div>
     </div>
   </div>
 </section>
@@ -706,6 +809,33 @@
   </div>
 </section>
 
+<section class="section faq" id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="section-tag">Preguntas frecuentes</span>
+      <h2 class="section-title">Antes de inscribirte</h2>
+    </div>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>¿IMC Academia es una universidad o instituto licenciado?</summary>
+        <p>No. IMC Academia es una plataforma de cursos y certificaciones técnicas, un proyecto de Ingeniería, Mantenimiento y Confiabilidad E.I.R.L. No otorgamos grados académicos ni estamos licenciados por SUNEDU. Nuestra <a href="vision.html" style="color:var(--teal);">visión a futuro</a> explica hacia dónde aspiramos a crecer.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Qué certificación recibo al terminar un programa?</summary>
+        <p>Un certificado IMC Academia por programa completado, verificable en cualquier momento desde nuestra <a href="verificar.html" style="color:var(--teal);">página de verificación de certificados</a> con el código único de cada emisión.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Cómo funciona la modalidad online?</summary>
+        <p>Todo el contenido es 100% online y a tu ritmo: video, casos reales de campo y evaluaciones cortas, pensado para gente que ya trabaja en el sector y no puede dejar su empleo actual para estudiar.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿El programa de aviación otorga la licencia de Técnico de Mantenimiento Aeronáutico?</summary>
+        <p>No. Es formación introductoria de familiarización con sistemas de aeronaves. Esa licencia depende exclusivamente de un Centro de Instrucción certificado por la DGAC, un proceso aparte al que no reemplazamos.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
 <section class="section" id="unirme">
   <div class="wrap">
     <div class="waitlist-card">
@@ -759,8 +889,8 @@
 
 <footer class="footer">
   <div class="wrap footer-inner">
-    <span>IMC Academia — Perú. Proyecto en etapa de validación.</span>
-    <span><a href="vision.html" style="color:inherit;">Nuestra visión a futuro</a> · Un proyecto de Ingeniería, Mantenimiento y Confiabilidad E.I.R.L.</span>
+    <span>IMC Academia — Perú. Proyecto en etapa de validación, respaldado por Ingeniería, Mantenimiento y Confiabilidad E.I.R.L.</span>
+    <span><a href="#quienes-somos" style="color:inherit;">Quiénes somos</a> · <a href="vision.html" style="color:inherit;">Nuestra visión a futuro</a> · <a href="verificar.html" style="color:inherit;">Verificar certificado</a></span>
   </div>
 </footer>
 
