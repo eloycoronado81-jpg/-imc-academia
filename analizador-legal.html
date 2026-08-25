@@ -158,7 +158,7 @@
         <label class="dropzone" id="dropzone" for="fileInput">
           <div class="dropzone-icon">📎</div>
           <div class="dropzone-title">Arrastra un archivo o haz clic para subirlo</div>
-          <div class="dropzone-sub">PDF, Word (.docx), Excel (.xlsx/.xls/.csv) o texto (.txt) — máx. 15 MB</div>
+          <div class="dropzone-sub">PDF (incluso escaneados, vía OCR), Word (.docx), Excel (.xlsx/.xls/.csv) o texto (.txt) — máx. 15 MB</div>
           <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt">
         </label>
         <div class="file-chip" id="fileChip">
@@ -289,12 +289,58 @@
   let pdfjsLibPromise = null;
   function loadPdfJs(){
     if (!pdfjsLibPromise){
-      pdfjsLibPromise = import('https://cdn.jsdelivr.net/npm/pdfjs-dist@6.2.108/build/pdf.min.mjs').then(mod => {
-        mod.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.2.108/build/pdf.worker.min.mjs';
+      pdfjsLibPromise = import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs').then(mod => {
+        mod.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';
         return mod;
       });
     }
     return pdfjsLibPromise;
+  }
+
+  let tesseractPromise = null;
+  function loadTesseract(){
+    if (!tesseractPromise){
+      tesseractPromise = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+        s.onload = () => resolve(window.Tesseract);
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+    return tesseractPromise;
+  }
+
+  const OCR_MAX_PAGES = 12;
+
+  // A PDF whose text layer yields almost nothing per page is very likely a
+  // scanned image with no embedded text, rather than an empty document.
+  function looksScanned(text, numPages){
+    return text.replace(/\s+/g, '').length < numPages * 15;
+  }
+
+  async function ocrPdf(doc){
+    const Tesseract = await loadTesseract();
+    const worker = await Tesseract.createWorker('spa');
+    const pageCount = Math.min(doc.numPages, OCR_MAX_PAGES);
+    const parts = [];
+    try {
+      for (let i = 1; i <= pageCount; i++){
+        setParseStatus(`Este PDF parece escaneado — aplicando OCR… página ${i} de ${pageCount}${doc.numPages > OCR_MAX_PAGES ? ` (se procesan las primeras ${OCR_MAX_PAGES} de ${doc.numPages})` : ''}`);
+        const page = await doc.getPage(i);
+        const viewport = page.getViewport({ scale: 2 });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        const { data } = await worker.recognize(canvas);
+        parts.push(data.text);
+      }
+    } finally {
+      await worker.terminate();
+    }
+    return parts.join('\n\n');
   }
 
   async function extractPdf(file){
@@ -310,7 +356,14 @@
       const content = await page.getTextContent();
       parts.push(content.items.map(item => item.str).join(' '));
     }
-    return parts.join('\n\n');
+    let text = parts.join('\n\n');
+
+    if (looksScanned(text, doc.numPages)){
+      setParseStatus('Cargando el lector de OCR…');
+      text = await ocrPdf(doc);
+    }
+
+    return text;
   }
 
   async function extractDocx(file){
@@ -369,7 +422,7 @@
 
       text = text.trim();
       if (!text){
-        setParseStatus('No se pudo extraer texto de este archivo (¿es un PDF escaneado como imagen? prueba con OCR primero, o pega el texto manualmente).', true);
+        setParseStatus('No se pudo extraer texto de este archivo. Si es un PDF escaneado, prueba con una imagen más nítida o pega el texto manualmente.', true);
         return;
       }
 
