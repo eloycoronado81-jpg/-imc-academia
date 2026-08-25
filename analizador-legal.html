@@ -71,9 +71,22 @@
   textarea{width:100%;min-height:220px;padding:16px;border:1.5px solid var(--line-strong);border-radius:10px;background:var(--ink);color:var(--text);font-size:14px;line-height:1.5;resize:vertical;}
   textarea:focus-visible{outline:2px solid var(--teal);outline-offset:1px;}
 
-  .upload-row{display:flex;align-items:center;gap:12px;margin:14px 0 22px;flex-wrap:wrap;}
-  .upload-row .file-label{font-size:13px;color:var(--text-dim);}
-  .upload-row input[type=file]{font-size:13px;}
+  .dropzone{border:1.5px dashed var(--line-strong);border-radius:12px;padding:22px;text-align:center;margin-bottom:18px;transition:border-color .15s, background .15s;cursor:pointer;display:block;}
+  .dropzone:hover, .dropzone.drag{border-color:var(--teal);background:var(--ink-3);}
+  .dropzone-icon{font-size:22px;margin-bottom:8px;}
+  .dropzone-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;}
+  .dropzone-sub{font-size:12.5px;color:var(--text-dimmer);}
+  .dropzone input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+  .file-chip{display:none;align-items:center;gap:10px;background:var(--ink-3);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:13px;}
+  .file-chip.show{display:flex;}
+  .file-chip .name{font-weight:600;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .file-chip .meta{color:var(--text-dimmer);font-family:var(--font-mono);font-size:11.5px;flex-shrink:0;}
+  .file-chip button{background:none;border:none;color:var(--text-dimmer);cursor:pointer;font-size:15px;padding:0 2px;flex-shrink:0;}
+  .file-chip button:hover{color:var(--err);}
+  .parse-status{font-size:12.5px;color:var(--teal-dark);margin:-10px 0 18px;display:none;align-items:center;gap:8px;}
+  .parse-status.show{display:flex;}
+  .parse-status.err{color:var(--err);}
+  .mini-spinner{width:12px;height:12px;border:2px solid var(--teal-dim);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0;}
 
   .disclaimer{font-size:12px;color:var(--text-dimmer);margin-top:16px;line-height:1.5;}
 
@@ -142,23 +155,31 @@
           </div>
         </div>
 
+        <label class="dropzone" id="dropzone" for="fileInput">
+          <div class="dropzone-icon">📎</div>
+          <div class="dropzone-title">Arrastra un archivo o haz clic para subirlo</div>
+          <div class="dropzone-sub">PDF, Word (.docx), Excel (.xlsx/.xls/.csv) o texto (.txt) — máx. 15 MB</div>
+          <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt">
+        </label>
+        <div class="file-chip" id="fileChip">
+          <span class="name" id="fileChipName"></span>
+          <span class="meta" id="fileChipMeta"></span>
+          <button type="button" id="fileChipRemove" aria-label="Quitar archivo">✕</button>
+        </div>
+        <div class="parse-status" id="parseStatus"><div class="mini-spinner"></div><span id="parseStatusText"></span></div>
+
         <div class="field-label">
           <span>Texto del documento</span>
           <span class="count" id="charCount">0 / 20 000</span>
         </div>
-        <textarea id="docText" placeholder="Pega aquí el texto del documento (normativa, contrato, reglamento, etc.)" maxlength="20000"></textarea>
+        <textarea id="docText" placeholder="Pega aquí el texto del documento, o sube un archivo arriba" maxlength="20000"></textarea>
 
-        <div class="upload-row">
-          <label class="file-label" for="fileInput">O carga un archivo .txt:</label>
-          <input type="file" id="fileInput" accept=".txt,text/plain">
-        </div>
-
-        <button type="submit" class="btn btn-primary" id="analyzeBtn">Analizar documento</button>
+        <button type="submit" class="btn btn-primary" id="analyzeBtn" style="margin-top:20px;">Analizar documento</button>
 
         <div class="loading" id="loadingRow"><div class="spinner"></div>Analizando el documento…</div>
         <div class="form-msg err" id="formMsg"></div>
 
-        <p class="disclaimer">Este análisis es generado por IA con fines informativos y educativos. No constituye asesoría legal profesional ni reemplaza la revisión de un abogado colegiado. IMC Academia no almacena el contenido de tu documento; solo se envía al modelo de IA para generar el análisis.</p>
+        <p class="disclaimer">Este análisis es generado por IA con fines informativos y educativos. No constituye asesoría legal profesional ni reemplaza la revisión de un abogado colegiado. Los archivos se leen en tu navegador; IMC Academia no almacena el contenido de tu documento, solo el texto se envía al modelo de IA para generar el análisis.</p>
       </form>
 
       <div class="results" id="results">
@@ -192,12 +213,17 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.12.1/mammoth.browser.min.js"></script>
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
   const supabase = createClient(
     'https://lixivclmhbcdztqpydnl.supabase.co',
     'sb_publishable_qnyiTwLqB0033E13lNuWpg_tuRWfJgM'
   );
+
+  const MAX_CHARS = 20000;
+  const MAX_FILE_BYTES = 15 * 1024 * 1024;
 
   const textEl = document.getElementById('docText');
   const charCount = document.getElementById('charCount');
@@ -206,19 +232,158 @@
   const loadingRow = document.getElementById('loadingRow');
   const formMsg = document.getElementById('formMsg');
   const results = document.getElementById('results');
+  const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('fileInput');
+  const fileChip = document.getElementById('fileChip');
+  const fileChipName = document.getElementById('fileChipName');
+  const fileChipMeta = document.getElementById('fileChipMeta');
+  const parseStatus = document.getElementById('parseStatus');
+  const parseStatusText = document.getElementById('parseStatusText');
 
   textEl.addEventListener('input', () => {
-    charCount.textContent = `${textEl.value.length.toLocaleString('es-PE')} / 20 000`;
+    charCount.textContent = `${textEl.value.length.toLocaleString('es-PE')} / ${MAX_CHARS.toLocaleString('es-PE')}`;
   });
 
-  fileInput.addEventListener('change', async () => {
-    const file = fileInput.files[0];
-    if (!file) return;
-    const text = await file.text();
-    textEl.value = text.slice(0, 20000);
-    textEl.dispatchEvent(new Event('input'));
+  function formatBytes(bytes){
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  function setParseStatus(text, isError){
+    if (!text){
+      parseStatus.classList.remove('show', 'err');
+      return;
+    }
+    parseStatusText.textContent = text;
+    parseStatus.classList.toggle('err', !!isError);
+    parseStatus.classList.add('show');
+  }
+
+  function clearFileChip(){
+    fileChip.classList.remove('show');
+    fileInput.value = '';
+  }
+  document.getElementById('fileChipRemove').addEventListener('click', () => {
+    clearFileChip();
+    setParseStatus('');
   });
+
+  ['dragover', 'dragenter'].forEach(evt => dropzone.addEventListener(evt, (e) => {
+    e.preventDefault();
+    dropzone.classList.add('drag');
+  }));
+  ['dragleave', 'drop'].forEach(evt => dropzone.addEventListener(evt, (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('drag');
+  }));
+  dropzone.addEventListener('drop', (e) => {
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (file) handleFile(file);
+  });
+
+  let pdfjsLibPromise = null;
+  function loadPdfJs(){
+    if (!pdfjsLibPromise){
+      pdfjsLibPromise = import('https://cdn.jsdelivr.net/npm/pdfjs-dist@6.2.108/build/pdf.min.mjs').then(mod => {
+        mod.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.2.108/build/pdf.worker.min.mjs';
+        return mod;
+      });
+    }
+    return pdfjsLibPromise;
+  }
+
+  async function extractPdf(file){
+    setParseStatus('Cargando el lector de PDF…');
+    const pdfjsLib = await loadPdfJs();
+    setParseStatus('Leyendo el PDF…');
+    const buffer = await file.arrayBuffer();
+    const doc = await pdfjsLib.getDocument({ data: buffer }).promise;
+    const parts = [];
+    for (let i = 1; i <= doc.numPages; i++){
+      setParseStatus(`Leyendo el PDF… página ${i} de ${doc.numPages}`);
+      const page = await doc.getPage(i);
+      const content = await page.getTextContent();
+      parts.push(content.items.map(item => item.str).join(' '));
+    }
+    return parts.join('\n\n');
+  }
+
+  async function extractDocx(file){
+    setParseStatus('Leyendo el documento de Word…');
+    const buffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+    return result.value;
+  }
+
+  async function extractSheet(file){
+    setParseStatus('Leyendo la hoja de cálculo…');
+    const buffer = await file.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: 'array' });
+    const parts = [];
+    workbook.SheetNames.forEach(name => {
+      const sheet = workbook.Sheets[name];
+      const csv = XLSX.utils.sheet_to_csv(sheet);
+      if (csv.trim()) parts.push(`## Hoja: ${name}\n${csv}`);
+    });
+    return parts.join('\n\n');
+  }
+
+  async function handleFile(file){
+    formMsg.textContent = '';
+    results.classList.remove('show');
+
+    if (file.size > MAX_FILE_BYTES){
+      setParseStatus(`El archivo pesa ${formatBytes(file.size)}; el máximo es ${formatBytes(MAX_FILE_BYTES)}.`, true);
+      return;
+    }
+
+    fileChipName.textContent = file.name;
+    fileChipMeta.textContent = formatBytes(file.size);
+    fileChip.classList.add('show');
+
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+
+    try {
+      let text = '';
+      if (ext === 'txt' || ext === 'csv'){
+        setParseStatus('Leyendo archivo de texto…');
+        text = await file.text();
+      } else if (ext === 'pdf'){
+        text = await extractPdf(file);
+      } else if (ext === 'docx'){
+        text = await extractDocx(file);
+      } else if (ext === 'doc'){
+        setParseStatus('El formato .doc antiguo no se puede leer en el navegador — guarda el archivo como .docx y vuelve a intentar.', true);
+        return;
+      } else if (ext === 'xlsx' || ext === 'xls'){
+        text = await extractSheet(file);
+      } else {
+        setParseStatus('Formato no soportado. Usa PDF, Word (.docx), Excel o texto plano.', true);
+        return;
+      }
+
+      text = text.trim();
+      if (!text){
+        setParseStatus('No se pudo extraer texto de este archivo (¿es un PDF escaneado como imagen? prueba con OCR primero, o pega el texto manualmente).', true);
+        return;
+      }
+
+      const truncated = text.length > MAX_CHARS;
+      textEl.value = truncated ? text.slice(0, MAX_CHARS) : text;
+      textEl.dispatchEvent(new Event('input'));
+      setParseStatus(truncated
+        ? `Listo — se leyeron ${text.length.toLocaleString('es-PE')} caracteres y se recortó a ${MAX_CHARS.toLocaleString('es-PE')}.`
+        : `Listo — se extrajeron ${text.length.toLocaleString('es-PE')} caracteres de "${file.name}".`, false);
+    } catch (err) {
+      console.error(err);
+      setParseStatus('No se pudo leer este archivo. Intenta con otro o pega el texto manualmente.', true);
+    }
+  }
 
   function renderList(el, items){
     el.innerHTML = '';
@@ -239,7 +404,7 @@
     formMsg.textContent = '';
     const texto = textEl.value.trim();
     if (texto.length < 30){
-      formMsg.textContent = 'Pega un texto de al menos 30 caracteres para poder analizarlo.';
+      formMsg.textContent = 'Pega un texto o sube un archivo con al menos 30 caracteres para poder analizarlo.';
       return;
     }
     const tipo = document.querySelector('input[name="tipo"]:checked').value;
