@@ -479,9 +479,18 @@
       });
 
       if (error || !data || data.error) {
-        formMsg.textContent = (data && data.error && typeof data.error === 'string')
-          ? data.error
-          : 'No se pudo generar el análisis. Intenta de nuevo en unos segundos.';
+        let mensaje = null;
+        if (data && data.error && typeof data.error === 'string') {
+          mensaje = data.error;
+        } else if (error && error.context && typeof error.context.json === 'function') {
+          // supabase-js puts a non-2xx response body on error.context instead of data.
+          try {
+            const body = await error.context.json();
+            if (body && typeof body.error === 'string') mensaje = body.error;
+          } catch { /* response body wasn't JSON or already consumed */ }
+        }
+        formMsg.textContent = mensaje || 'No se pudo generar el análisis. Intenta de nuevo en unos segundos.';
+        console.error('imc-legal-analyzer error:', error, data);
       } else {
         const a = data.analisis || {};
         document.getElementById('tipoDetectado').textContent = a.tipo_detectado || 'Análisis';
