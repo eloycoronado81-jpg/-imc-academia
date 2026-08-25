@@ -71,6 +71,9 @@
   textarea{width:100%;min-height:220px;padding:16px;border:1.5px solid var(--line-strong);border-radius:10px;background:var(--ink);color:var(--text);font-size:14px;line-height:1.5;resize:vertical;}
   textarea:focus-visible{outline:2px solid var(--teal);outline-offset:1px;}
 
+  .instruccion-input{width:100%;padding:13px 16px;border:1.5px solid var(--line-strong);border-radius:10px;background:var(--ink);color:var(--text);font-size:14px;}
+  .instruccion-input:focus-visible{outline:2px solid var(--teal);outline-offset:1px;}
+
   .dropzone{border:1.5px dashed var(--line-strong);border-radius:12px;padding:22px;text-align:center;margin-bottom:18px;transition:border-color .15s, background .15s;cursor:pointer;display:block;}
   .dropzone:hover, .dropzone.drag{border-color:var(--teal);background:var(--ink-3);}
   .dropzone-icon{font-size:22px;margin-bottom:8px;}
@@ -173,6 +176,9 @@
           <span class="count" id="charCount">0 / 20 000</span>
         </div>
         <textarea id="docText" placeholder="Pega aquí el texto del documento, o sube un archivo arriba" maxlength="20000"></textarea>
+
+        <div class="field-label" style="margin-top:18px;">¿Qué quieres que haga la IA con este documento? <span style="font-weight:400;color:var(--text-dimmer);">(opcional)</span></div>
+        <input type="text" id="instruccion" class="instruccion-input" placeholder="Ej: resume solo las obligaciones de pago, dime si hay riesgos urgentes, compáralo con la política de la empresa…" maxlength="300">
 
         <button type="submit" class="btn btn-primary" id="analyzeBtn" style="margin-top:20px;">Analizar documento</button>
 
@@ -461,6 +467,7 @@
       return;
     }
     const tipo = document.querySelector('input[name="tipo"]:checked').value;
+    const instruccion = document.getElementById('instruccion').value.trim();
 
     btn.disabled = true;
     loadingRow.classList.add('show');
@@ -468,7 +475,7 @@
 
     try {
       const { data, error } = await supabase.functions.invoke('imc-legal-analyzer', {
-        body: { texto, tipo }
+        body: { texto, tipo, instruccion }
       });
 
       if (error || !data || data.error) {
