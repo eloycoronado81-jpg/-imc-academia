@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analizador Legal IA — IMC Academia</title>
+<meta name="description" content="Pega el texto de una normativa técnica, un contrato o cualquier documento legal y recibe en segundos un resumen, puntos clave, riesgos y recomendaciones generados por IA. Gratis, sin registro.">
+<meta property="og:title" content="Analizador Legal IA — IMC Academia">
+<meta property="og:description" content="Analiza normativas técnicas, contratos y documentos legales con IA. Resumen, riesgos y recomendaciones en segundos.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#EAF9F5">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%231FA98A'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
+  :root{
+    --ink:#EAF9F5; --ink-2:#FFFFFF; --ink-3:#DFF3EE;
+    --teal:#1FA98A; --teal-dark:#178F74; --teal-dim:#A9DDD1;
+    --text:#0F3D36; --text-dim:#4C7A72; --text-dimmer:#7FA79E;
+    --line: rgba(15,61,54,0.10); --line-strong: rgba(15,61,54,0.18);
+    --ok:#178F74; --err:#C6693A; --warn:#B8862E;
+    --radius:10px;
+    --font-display:'Poppins', sans-serif; --font-body:'Manrope', sans-serif; --font-mono:'Manrope', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ink);color:var(--text);font-family:var(--font-body);line-height:1.55;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+  button,textarea,input,select{font-family:inherit;}
+
+  .wrap{max-width:900px;margin:0 auto;padding:0 24px;}
+
+  .navbar{position:sticky;top:0;z-index:50;background:rgba(234,249,245,0.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
+  .nav-inner{max-width:900px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;}
+  .brand{font-family:var(--font-display);font-weight:700;font-size:19px;display:flex;align-items:center;gap:9px;color:var(--text);text-decoration:none;}
+  .brand-mark{width:12px;height:12px;border:2px solid var(--teal);border-radius:50%;}
+  .navlinks{display:flex;gap:20px;font-size:14px;font-weight:500;color:var(--text-dim);}
+  .navlinks a{text-decoration:none;transition:color .15s;}
+  .navlinks a:hover{color:var(--text);}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 24px;font-size:14px;font-weight:700;border-radius:100px;border:1.5px solid transparent;cursor:pointer;transition:transform .12s, background .15s, border-color .15s, box-shadow .15s;text-decoration:none;}
+  .btn:active{transform:scale(0.98);}
+  .btn:disabled{opacity:0.55;cursor:not-allowed;}
+  .btn-primary{background:var(--teal);color:#fff;}
+  .btn-primary:hover:not(:disabled){background:var(--teal-dark);box-shadow:0 8px 20px rgba(31,169,138,0.28);}
+  .btn-ghost{background:transparent;color:var(--text);border-color:var(--line-strong);}
+  .btn-ghost:hover{border-color:var(--text);}
+
+  .hero{padding:56px 0 8px;text-align:center;}
+  .eyebrow{font-family:var(--font-mono);font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--teal);margin:0 0 14px;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .eyebrow::before,.eyebrow::after{content:'';width:16px;height:1.5px;background:var(--teal);}
+  .hero-title{font-family:var(--font-display);font-weight:700;font-size:clamp(28px,4.6vw,42px);line-height:1.12;margin:0 0 14px;color:var(--text);}
+  .hero-title span{color:var(--teal);}
+  .hero-sub{font-size:16px;color:var(--text-dim);max-width:560px;margin:0 auto;}
+
+  .section{padding:40px 0 90px;}
+
+  .panel{background:var(--ink-2);border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:0 10px 30px rgba(15,61,54,0.06);}
+  @media(min-width:640px){.panel{padding:34px;}}
+
+  .tipo-group{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+  .tipo-opt{flex:1;min-width:150px;position:relative;}
+  .tipo-opt input{position:absolute;opacity:0;inset:0;cursor:pointer;margin:0;}
+  .tipo-opt label{display:block;padding:12px 14px;border:1.5px solid var(--line-strong);border-radius:10px;font-size:13.5px;font-weight:600;color:var(--text-dim);text-align:center;cursor:pointer;transition:border-color .15s, background .15s, color .15s;}
+  .tipo-opt input:checked + label{border-color:var(--teal);background:var(--ink-3);color:var(--teal-dark);}
+  .tipo-opt input:focus-visible + label{outline:2px solid var(--teal);outline-offset:2px;}
+
+  .field-label{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:8px;}
+  .field-label .count{font-family:var(--font-mono);font-weight:400;color:var(--text-dimmer);}
+  textarea{width:100%;min-height:220px;padding:16px;border:1.5px solid var(--line-strong);border-radius:10px;background:var(--ink);color:var(--text);font-size:14px;line-height:1.5;resize:vertical;}
+  textarea:focus-visible{outline:2px solid var(--teal);outline-offset:1px;}
+
+  .upload-row{display:flex;align-items:center;gap:12px;margin:14px 0 22px;flex-wrap:wrap;}
+  .upload-row .file-label{font-size:13px;color:var(--text-dim);}
+  .upload-row input[type=file]{font-size:13px;}
+
+  .disclaimer{font-size:12px;color:var(--text-dimmer);margin-top:16px;line-height:1.5;}
+
+  .form-msg{font-size:13.5px;margin-top:14px;min-height:18px;}
+  .form-msg.err{color:var(--err);}
+
+  .results{margin-top:36px;display:none;}
+  .results.show{display:block;}
+  .results-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .results-tag{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--teal-dark);background:var(--ink-3);padding:4px 10px;border-radius:100px;text-transform:uppercase;letter-spacing:0.04em;}
+  .result-card{background:var(--ink-2);border:1px solid var(--line);border-radius:12px;padding:22px 24px;margin-top:16px;}
+  .result-card h3{font-family:var(--font-display);font-size:15px;margin:0 0 12px;color:var(--text);display:flex;align-items:center;gap:8px;}
+  .result-card p{margin:0;color:var(--text-dim);font-size:14.5px;}
+  .result-card ul{margin:0;padding-left:20px;color:var(--text-dim);font-size:14.5px;}
+  .result-card li{margin-bottom:8px;}
+  .result-card li:last-child{margin-bottom:0;}
+  .result-card.riesgos{border-left:3px solid var(--warn);}
+  .result-card.recomendaciones{border-left:3px solid var(--teal);}
+
+  .loading{display:none;align-items:center;gap:10px;margin-top:20px;color:var(--text-dim);font-size:14px;}
+  .loading.show{display:flex;}
+  .spinner{width:16px;height:16px;border:2px solid var(--teal-dim);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .footer{border-top:1px solid var(--line);padding:30px 0;text-align:center;font-size:13px;color:var(--text-dimmer);}
+  .footer a{color:var(--teal-dark);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="brand"><span class="brand-mark"></span>IMC Academia</a>
+    <nav class="navlinks">
+      <a href="index.html">Inicio</a>
+      <a href="plataforma.html">Ingresar</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Herramienta gratuita · IA</span>
+    <h1 class="hero-title">Analizador legal <span>con IA</span></h1>
+    <p class="hero-sub">Pega el texto de una normativa técnica, un contrato o cualquier documento legal. En segundos obtienes un resumen, los puntos clave, los riesgos a revisar y recomendaciones de siguiente paso.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="panel">
+      <form id="analyzeForm">
+        <div class="field-label" style="margin-bottom:10px;">Tipo de documento</div>
+        <div class="tipo-group">
+          <div class="tipo-opt">
+            <input type="radio" name="tipo" id="tipoNormativa" value="normativa técnica / reglamento del sector" checked>
+            <label for="tipoNormativa">📋 Normativa técnica</label>
+          </div>
+          <div class="tipo-opt">
+            <input type="radio" name="tipo" id="tipoContrato" value="contrato">
+            <label for="tipoContrato">📄 Contrato</label>
+          </div>
+          <div class="tipo-opt">
+            <input type="radio" name="tipo" id="tipoGenerico" value="documento legal genérico">
+            <label for="tipoGenerico">⚖️ Otro documento legal</label>
+          </div>
+        </div>
+
+        <div class="field-label">
+          <span>Texto del documento</span>
+          <span class="count" id="charCount">0 / 20 000</span>
+        </div>
+        <textarea id="docText" placeholder="Pega aquí el texto del documento (normativa, contrato, reglamento, etc.)" maxlength="20000"></textarea>
+
+        <div class="upload-row">
+          <label class="file-label" for="fileInput">O carga un archivo .txt:</label>
+          <input type="file" id="fileInput" accept=".txt,text/plain">
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="analyzeBtn">Analizar documento</button>
+
+        <div class="loading" id="loadingRow"><div class="spinner"></div>Analizando el documento…</div>
+        <div class="form-msg err" id="formMsg"></div>
+
+        <p class="disclaimer">Este análisis es generado por IA con fines informativos y educativos. No constituye asesoría legal profesional ni reemplaza la revisión de un abogado colegiado. IMC Academia no almacena el contenido de tu documento; solo se envía al modelo de IA para generar el análisis.</p>
+      </form>
+
+      <div class="results" id="results">
+        <div class="results-head">
+          <span class="results-tag" id="tipoDetectado">Análisis</span>
+        </div>
+        <div class="result-card">
+          <h3>📝 Resumen</h3>
+          <p id="resResumen"></p>
+        </div>
+        <div class="result-card">
+          <h3>🔑 Puntos clave</h3>
+          <ul id="resPuntos"></ul>
+        </div>
+        <div class="result-card riesgos">
+          <h3>⚠️ Riesgos y puntos a revisar</h3>
+          <ul id="resRiesgos"></ul>
+        </div>
+        <div class="result-card recomendaciones">
+          <h3>✅ Recomendaciones</h3>
+          <ul id="resRecomendaciones"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap">
+    Una herramienta de <a href="index.html">IMC Academia</a> — formación técnica en mantenimiento, confiabilidad, energía, minería y aviación.
+  </div>
+</footer>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+  const supabase = createClient(
+    'https://lixivclmhbcdztqpydnl.supabase.co',
+    'sb_publishable_qnyiTwLqB0033E13lNuWpg_tuRWfJgM'
+  );
+
+  const textEl = document.getElementById('docText');
+  const charCount = document.getElementById('charCount');
+  const form = document.getElementById('analyzeForm');
+  const btn = document.getElementById('analyzeBtn');
+  const loadingRow = document.getElementById('loadingRow');
+  const formMsg = document.getElementById('formMsg');
+  const results = document.getElementById('results');
+  const fileInput = document.getElementById('fileInput');
+
+  textEl.addEventListener('input', () => {
+    charCount.textContent = `${textEl.value.length.toLocaleString('es-PE')} / 20 000`;
+  });
+
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    const text = await file.text();
+    textEl.value = text.slice(0, 20000);
+    textEl.dispatchEvent(new Event('input'));
+  });
+
+  function renderList(el, items){
+    el.innerHTML = '';
+    (items || []).forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = item;
+      el.appendChild(li);
+    });
+    if (!items || items.length === 0){
+      const li = document.createElement('li');
+      li.textContent = 'Sin información suficiente en el texto.';
+      el.appendChild(li);
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    formMsg.textContent = '';
+    const texto = textEl.value.trim();
+    if (texto.length < 30){
+      formMsg.textContent = 'Pega un texto de al menos 30 caracteres para poder analizarlo.';
+      return;
+    }
+    const tipo = document.querySelector('input[name="tipo"]:checked').value;
+
+    btn.disabled = true;
+    loadingRow.classList.add('show');
+    results.classList.remove('show');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('imc-legal-analyzer', {
+        body: { texto, tipo }
+      });
+
+      if (error || !data || data.error) {
+        formMsg.textContent = (data && data.error && typeof data.error === 'string')
+          ? data.error
+          : 'No se pudo generar el análisis. Intenta de nuevo en unos segundos.';
+      } else {
+        const a = data.analisis || {};
+        document.getElementById('tipoDetectado').textContent = a.tipo_detectado || 'Análisis';
+        document.getElementById('resResumen').textContent = a.resumen || 'Sin resumen disponible.';
+        renderList(document.getElementById('resPuntos'), a.puntos_clave);
+        renderList(document.getElementById('resRiesgos'), a.riesgos);
+        renderList(document.getElementById('resRecomendaciones'), a.recomendaciones);
+        results.classList.add('show');
+        results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } catch (err) {
+      formMsg.textContent = 'Ocurrió un error de conexión. Intenta de nuevo.';
+    }
+
+    btn.disabled = false;
+    loadingRow.classList.remove('show');
+  });
+</script>
+
+</body>
+</html>

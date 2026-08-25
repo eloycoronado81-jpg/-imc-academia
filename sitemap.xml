@@ -17,4 +17,8 @@
     <loc>https://REEMPLAZA-CON-TU-DOMINIO/plataforma.html</loc>
     <priority>0.5</priority>
   </url>
+  <url>
+    <loc>https://REEMPLAZA-CON-TU-DOMINIO/analizador-legal.html</loc>
+    <priority>0.6</priority>
+  </url>
 </urlset>
